@@ -1,6 +1,6 @@
-package com.springboot.oauth2.config;
+package com.springboot.auth.authorization.config;
 
-import com.springboot.oauth2.config.custom.CustomTokenEnhancer;
+import com.springboot.auth.authorization.config.custom.CustomTokenEnhancer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;

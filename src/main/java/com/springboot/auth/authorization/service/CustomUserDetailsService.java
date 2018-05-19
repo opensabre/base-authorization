@@ -1,7 +1,7 @@
-package com.springboot.oauth2.service;
+package com.springboot.auth.authorization.service;
 
-import com.springboot.oauth2.entity.Role;
-import com.springboot.oauth2.entity.User;
+import com.springboot.auth.authorization.entity.Role;
+import com.springboot.auth.authorization.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;

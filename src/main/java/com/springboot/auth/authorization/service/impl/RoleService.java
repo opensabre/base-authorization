@@ -1,8 +1,8 @@
-package com.springboot.oauth2.service.impl;
+package com.springboot.auth.authorization.service.impl;
 
-import com.springboot.oauth2.dao.RoleMapper;
-import com.springboot.oauth2.entity.Role;
-import com.springboot.oauth2.service.IRoleService;
+import com.springboot.auth.authorization.dao.RoleMapper;
+import com.springboot.auth.authorization.entity.Role;
+import com.springboot.auth.authorization.service.IRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

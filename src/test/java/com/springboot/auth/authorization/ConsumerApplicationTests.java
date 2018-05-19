@@ -1,4 +1,4 @@
-package com.springboot.turbine;
+package com.springboot.auth.authorization;
 
 import org.junit.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

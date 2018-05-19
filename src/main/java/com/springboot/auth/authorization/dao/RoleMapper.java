@@ -1,6 +1,6 @@
-package com.springboot.oauth2.dao;
+package com.springboot.auth.authorization.dao;
 
-import com.springboot.oauth2.entity.Role;
+import com.springboot.auth.authorization.entity.Role;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;

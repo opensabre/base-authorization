@@ -1,6 +1,6 @@
-package com.springboot.oauth2.service;
+package com.springboot.auth.authorization.service;
 
-import com.springboot.oauth2.entity.Role;
+import com.springboot.auth.authorization.entity.Role;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;

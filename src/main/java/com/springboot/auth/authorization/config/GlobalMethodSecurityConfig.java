@@ -1,4 +1,4 @@
-package com.springboot.oauth2.config;
+package com.springboot.auth.authorization.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
