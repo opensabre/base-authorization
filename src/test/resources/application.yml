@@ -3,9 +3,6 @@ server:
 
 spring:
   datasource:
-    druid:
-      web-stat-filter:
-        enabled: false
     url: jdbc:h2:mem:sc_auth;MODE=PostgreSQL;INIT=RUNSCRIPT FROM '../db/ddl/postgres/oauth2_ddl.sql'\;RUNSCRIPT FROM '../db/ddl/postgres/users_ddl.sql'\;RUNSCRIPT FROM '../db/dml/oauth2_dml.sql'\;RUNSCRIPT FROM '../db/dml/users_dml.sql'
     username: sa
     password:

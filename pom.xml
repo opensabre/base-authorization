@@ -24,9 +24,11 @@
         <spring.cloud.version>2021.0.4</spring.cloud.version>
         <spring.cloud.alibaba.version>2021.0.4.0</spring.cloud.alibaba.version>
         <jetcache-starter-redis.version>2.7.0</jetcache-starter-redis.version>
-        <common-test.version>0.0.1</common-test.version>
         <springdoc-openapi-ui.version>1.6.12</springdoc-openapi-ui.version>
         <spring-cloud-starter-oauth2.version>2.2.5.RELEASE</spring-cloud-starter-oauth2.version>
+        <mysql-connector-j.version>8.0.31</mysql-connector-j.version>
+        <!--  测试   -->
+        <common-test.version>0.0.1</common-test.version>
     </properties>
 
     <dependencyManagement>
@@ -98,7 +100,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-loadbalancer</artifactId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
         <!--消息总线-->
         <dependency>
@@ -157,7 +159,7 @@
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
-            <version>8.0.31</version>
+            <version>${mysql-connector-j.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>

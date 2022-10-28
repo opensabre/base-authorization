@@ -22,6 +22,8 @@ spring:
   sleuth:
     sampler:
       probability: 1.0
+    feign:
+      enabled: true
   mvc:
     throw-exception-if-no-handler-found: true
   cloud:

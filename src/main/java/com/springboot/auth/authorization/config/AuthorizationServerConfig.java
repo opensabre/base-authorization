@@ -152,8 +152,8 @@ public class AuthorizationServerConfig {
                 .redirectUri("https://www.baidu.com")
                 .redirectUri("http://127.0.0.1:8000/login/oauth2/code/messaging-client-oidc")
                 .scope(OidcScopes.OPENID)
-                .scope("message.read")
-                .scope("message.write")
+                .scope("read")
+                .scope("write")
                 .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
                 .tokenSettings(TokenSettings.builder()
                         // token有效期100分钟
