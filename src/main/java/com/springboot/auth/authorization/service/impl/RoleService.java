@@ -3,7 +3,6 @@ package com.springboot.auth.authorization.service.impl;
 import com.springboot.auth.authorization.entity.Role;
 import com.springboot.auth.authorization.provider.OrganizationProvider;
 import com.springboot.auth.authorization.service.IRoleService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;

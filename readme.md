@@ -9,13 +9,13 @@
 
 ### 先决条件
 
-- [postgresql](http://www.postgresql.org/)
+- [mysql](http://www.mysql.com/)
 - [rabbitmq](http://rabbitmq.io/download)
 - [nacos](../../docs/register.md)
 
 ### 启动命令
 
-部署脚本：启动数据库，部署`auth/db`下的ddl和dml脚本
+部署脚本：启动数据库，部署`db`下的ddl和dml脚本
 
 启动应用：`mvn spring-boot:run`
 
@@ -70,7 +70,7 @@ password: `password`
 请求报文
 
 ```
-POST /oauth/token?scope=read&grant_type=password HTTP/1.1
+POST /oauth2/token?scope=read&grant_type=password HTTP/1.1
 Host: localhost:8000
 Authorization: Basic dGVzdF9jbGllbnQ6dGVzdF9zZWNyZXQ=
 Cache-Control: no-cache
@@ -101,7 +101,7 @@ username=zhoutaoo&password=password
 请求报文
 
 ```
-POST /oauth/token?scope=read&grant_type=client_credentials HTTP/1.1
+POST /oauth2/token?scope=read&grant_type=client_credentials HTTP/1.1
 Host: localhost:8000
 Authorization: Basic dGVzdF9jbGllbnQ6dGVzdF9zZWNyZXQ=
 Cache-Control: no-cache
@@ -128,7 +128,7 @@ Cache-Control: no-cache
 
 1. 用户跳转至平台
 
-`http://host1:8000/oauth/authorize?response_type=code&client_id=test_client&scope=read&state=test&redirect_uri=http://baidu.com`
+`http://host1:8000/oauth2/authorize?response_type=code&client_id=test_client&scope=read&state=test&redirect_uri=http://baidu.com`
 
 ```
 client_id： 商户申请的client_id(oauth_client_details表中的记录)
@@ -156,7 +156,7 @@ redirect_uri： 该参数要与商户申请client_id时登记的url(oauth_client
 请求报文
 
 ```
-POST /oauth/token?grant_type=authorization_code&code=A32sYi&redirect_uri=http://baidu.com HTTP/1.1
+POST /oauth2/token?grant_type=authorization_code&code=A32sYi&redirect_uri=http://baidu.com HTTP/1.1
 Host: localhost:8000
 Authorization: Basic dGVzdF9jbGllbnQ6dGVzdF9zZWNyZXQ=
 Cache-Control: no-cache
@@ -183,7 +183,7 @@ Cache-Control: no-cache
 请求报文
 
 ```
-POST /oauth/token?scope=read&amp;grant_type=refresh_token&amp;refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJhZG1pbiIsInNjb3BlIjpbInJlYWQiXSwib3JnYW5pemF0aW9uIjoiYWRtaW4iLCJhdGkiOiJlODA5MDRkYi1mMDBkLTRkNDAtOGFlNS0xMWY2OTVlMzZjMTEiLCJleHAiOjE1MzQ1MjQzMTQsImF1dGhvcml0aWVzIjpbIkFETUlOIl0sImp0aSI6Ijk0OGUxZTYxLTBkOTUtNGYzMC04YWNlLWFmNDcyNjU2ZWNiNCIsImNsaWVudF9pZCI6InRlc3RfY2xpZW50In0.XrvwAi14NTJXm029CGFD3BsPgZdYQ7u1nszYlf42Eo8 HTTP/1.1
+POST /oauth2/token?scope=read&amp;grant_type=refresh_token&amp;refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJhZG1pbiIsInNjb3BlIjpbInJlYWQiXSwib3JnYW5pemF0aW9uIjoiYWRtaW4iLCJhdGkiOiJlODA5MDRkYi1mMDBkLTRkNDAtOGFlNS0xMWY2OTVlMzZjMTEiLCJleHAiOjE1MzQ1MjQzMTQsImF1dGhvcml0aWVzIjpbIkFETUlOIl0sImp0aSI6Ijk0OGUxZTYxLTBkOTUtNGYzMC04YWNlLWFmNDcyNjU2ZWNiNCIsImNsaWVudF9pZCI6InRlc3RfY2xpZW50In0.XrvwAi14NTJXm029CGFD3BsPgZdYQ7u1nszYlf42Eo8 HTTP/1.1
 Host: host1:8000
 Authorization: Basic dGVzdF9jbGllbnQ6dGVzdF9zZWNyZXQ=
 Cache-Control: no-cache
@@ -212,7 +212,7 @@ Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0g
 请求报文
 
 ```
-POST /oauth/token HTTP/1.1
+POST /oauth2/token HTTP/1.1
 Host: localhost:8000
 Cache-Control: no-cache
 Content-Type: application/x-www-form-urlencoded
