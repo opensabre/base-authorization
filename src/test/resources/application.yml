@@ -3,24 +3,33 @@ server:
 
 spring:
   datasource:
-    url: jdbc:h2:mem:sc_auth;MODE=PostgreSQL;INIT=RUNSCRIPT FROM '../db/ddl/postgres/oauth2_ddl.sql'\;RUNSCRIPT FROM '../db/ddl/postgres/users_ddl.sql'\;RUNSCRIPT FROM '../db/dml/oauth2_dml.sql'\;RUNSCRIPT FROM '../db/dml/users_dml.sql'
-    username: sa
-    password:
+    url: jdbc:h2:mem:os_base_auth;MODE=mysql;INIT=RUNSCRIPT FROM '../db/os-base-auth-db.sql'
+    username: root
+    password: root123
     driver-class-name: org.h2.Driver
   mvc:
     throw-exception-if-no-handler-found: true
-  servlet:
-    multipart:
-      max-request-size: "2MB"
-      max-file-size: "2MB"
-  jackson:
-    time-zone: GMT+8
+  cloud:
+    loadbalancer:
+      retry:
+        enabled: true
+  sleuth:
+    sampler:
+      probability: 1.0
+    feign:
+      enabled: true
   flyway:
     locations: classpath:.
     baseline-on-migrate: true
   devtools:
     livereload:
       enabled: true
+
+feign:
+  sentinel:
+    enabled: true
+  okhttp:
+    enabled: true
 
 logging:
   level:
@@ -41,3 +50,6 @@ management:
       exposure:
         include: '*'
 
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true

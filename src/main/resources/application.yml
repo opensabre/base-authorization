@@ -4,10 +4,6 @@ spring:
     port: ${RABBIT_MQ_PORT:5672}
     username: ${RABBIT_MQ_USERNAME:guest}
     password: ${RABBIT_MQ_PASSWORD:guest}
-  redis:
-    host: ${REDIS_HOST:localhost}
-    port: ${REDIS_PORT:6379}
-    ##password: ${REDIS_PASSWORD:}
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:${DATASOURCE_DBTYPE:mysql}://${DATASOURCE_HOST:localhost}:${DATASOURCE_PORT:3306}/os_base_auth?characterEncoding=UTF-8&useUnicode=true&useSSL=false&serverTimezone=GMT
@@ -18,18 +14,23 @@ spring:
       idle-timeout: 600000
       max-lifetime: 1800000
       maximum-pool-size: 20
-
-  sleuth:
-    sampler:
-      probability: 1.0
-    feign:
-      enabled: true
   mvc:
     throw-exception-if-no-handler-found: true
   cloud:
     loadbalancer:
       retry:
         enabled: true
+  sleuth:
+    sampler:
+      probability: 1.0
+    feign:
+      enabled: true
+
+feign:
+  sentinel:
+    enabled: true
+  okhttp:
+    enabled: true
 
 logging:
   level:
@@ -43,18 +44,12 @@ logging:
   file:
     path: logs/
 
-feign:
-  sentinel:
-    enabled: true
-  okhttp:
-    enabled: true
-
 management:
   endpoints:
     web:
       exposure:
         include: '*'
 
-mybatis:
+mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
