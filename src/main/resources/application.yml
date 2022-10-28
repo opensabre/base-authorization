@@ -10,23 +10,20 @@ spring:
     ##password: ${REDIS_PASSWORD:}
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:${DATASOURCE_DBTYPE:mysql}://${DATASOURCE_HOST:localhost}:${DATASOURCE_PORT:3306}/sc_auth?characterEncoding=UTF-8&useUnicode=true&useSSL=false&serverTimezone=GMT
+    url: jdbc:${DATASOURCE_DBTYPE:mysql}://${DATASOURCE_HOST:localhost}:${DATASOURCE_PORT:3306}/os_base_auth?characterEncoding=UTF-8&useUnicode=true&useSSL=false&serverTimezone=GMT
     username: ${DATASOURCE_USERNAME:root}
     password: ${DATASOURCE_PASSWORD:root123}
-  zipkin:
-    enabled: true
-    sender:
-      type: rabbit
+    hikari:
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      maximum-pool-size: 20
+
   sleuth:
     sampler:
       probability: 1.0
   mvc:
     throw-exception-if-no-handler-found: true
-  #jwt的密钥
-  security:
-    oauth2:
-      jwt:
-        signingKey: 123456
   cloud:
     loadbalancer:
       retry:
@@ -38,9 +35,11 @@ logging:
     org.springframework.security: DEBUG
     org.apache.ibatis: debug
     java.sql.PreparedStatement: debug
-  path: logs/
+  logback:
+    rollingpolicy:
+      max-file-size: 1GB
   file:
-    max-size: 1GB
+    path: logs/
 
 feign:
   sentinel:

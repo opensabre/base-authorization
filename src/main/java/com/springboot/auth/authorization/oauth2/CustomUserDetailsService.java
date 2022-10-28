@@ -43,8 +43,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     /**
      * 获得登录者所有角色的权限集合.
      *
-     * @param user
-     * @return
+     * @param user 用户信息
+     * @return 权限集合
      */
     protected Set<GrantedAuthority> obtainGrantedAuthorities(User user) {
         Set<Role> roles = roleService.queryUserRolesByUserId(user.getId());

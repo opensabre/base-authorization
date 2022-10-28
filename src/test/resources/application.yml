@@ -32,9 +32,11 @@ logging:
     java.sql.PreparedStatement: info
     java.sql.Statement: info
     Java.sql.Connection: info
-  path: logs/
   file:
-    max-size: 1GB
+    path: logs/
+  logback:
+    rollingpolicy:
+      max-file-size: 1GB
 
 management:
   endpoints:

@@ -1,6 +1,6 @@
 package com.springboot.auth.authorization.exception;
 
-import com.springboot.cloud.common.core.exception.ErrorType;
+import io.github.opensabre.common.core.exception.ErrorType;
 import lombok.Getter;
 
 @Getter
@@ -24,11 +24,11 @@ public enum AuthErrorType implements ErrorType {
     /**
      * 错误类型码
      */
-    private String code;
+    private final String code;
     /**
      * 错误类型描述信息
      */
-    private String mesg;
+    private final String mesg;
 
     AuthErrorType(String code, String mesg) {
         this.code = code;

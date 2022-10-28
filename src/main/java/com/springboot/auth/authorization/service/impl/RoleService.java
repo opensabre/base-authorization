@@ -6,12 +6,13 @@ import com.springboot.auth.authorization.service.IRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.Set;
 
 @Service
 public class RoleService implements IRoleService {
 
-    @Autowired
+    @Resource
     private OrganizationProvider organizationProvider;
 
     @Override
