@@ -35,7 +35,6 @@
             <artifactId>opensabre-base-starter</artifactId>
             <version>${opensabre-base-starter.version}</version>
         </dependency>
-
         <!--测试框架-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -68,6 +67,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <classifier>exec</classifier>
+                </configuration>
             </plugin>
             <!--docker镜像构建-->
             <plugin>
@@ -76,5 +78,68 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>native</id>
+            <properties>
+                <repackage.classifier>exec</repackage.classifier>
+                <native-buildtools.version>0.9.16</native-buildtools.version>
+                <spring-native.version>0.12.1</spring-native.version>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.springframework.experimental</groupId>
+                    <artifactId>spring-native</artifactId>
+                    <version>${spring-native.version}</version>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <version>${native-buildtools.version}</version>
+                        <extensions>true</extensions>
+                        <executions>
+                            <execution>
+                                <id>test-native</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>build-native</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.springframework.experimental</groupId>
+                        <artifactId>spring-aot-maven-plugin</artifactId>
+                        <version>${spring-native.version}</version>
+                        <executions>
+                            <execution>
+                                <id>test-generate</id>
+                                <goals>
+                                    <goal>test-generate</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>generate</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
