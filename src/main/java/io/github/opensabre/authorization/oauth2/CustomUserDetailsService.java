@@ -29,7 +29,6 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         User user = userService.getByUniqueId(uniqueId);
         log.info("load user by username :{}", user.toString());
-
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
