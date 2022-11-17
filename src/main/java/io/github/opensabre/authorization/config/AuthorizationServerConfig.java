@@ -13,22 +13,14 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
-import org.springframework.security.oauth2.core.OAuth2TokenFormat;
-import org.springframework.security.oauth2.core.oidc.OidcScopes;
-import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationConsentService;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.config.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.config.ProviderSettings;
-import org.springframework.security.oauth2.server.authorization.config.TokenSettings;
 import org.springframework.security.oauth2.server.authorization.token.*;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -38,10 +30,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -136,38 +125,7 @@ public class AuthorizationServerConfig {
      */
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
-        JdbcRegisteredClientRepository jdbcRegisteredClientRepository = new JdbcRegisteredClientRepository(jdbcTemplate);
-        RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
-                .clientId("test_client")
-                .clientSecret(passwordEncoder().encode("test_client"))
-                .clientSecretExpiresAt(Instant.now().plusSeconds(7200))
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                .redirectUri("https://www.baidu.com")
-                .scope(OidcScopes.OPENID)
-                .scope("read")
-                .scope("write")
-                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
-                .tokenSettings(TokenSettings.builder()
-                        // token有效期100分钟
-                        .accessTokenTimeToLive(Duration.ofMinutes(100L))
-                        // 使用默认JWT相关格式
-                        .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
-                        // 开启刷新token
-                        .reuseRefreshTokens(true)
-                        // refreshToken有效期120分钟
-                        .refreshTokenTimeToLive(Duration.ofMinutes(120L))
-                        .idTokenSignatureAlgorithm(SignatureAlgorithm.RS256).build()
-                )
-                .build();
-        RegisteredClient client = jdbcRegisteredClientRepository.findByClientId("test-client");
-        Optional<RegisteredClient> clientOptional = Optional.ofNullable(client);
-        if (clientOptional.isEmpty()) {
-            jdbcRegisteredClientRepository.save(registeredClient);
-        }
-        return jdbcRegisteredClientRepository;
+        return new JdbcRegisteredClientRepository(jdbcTemplate);
     }
 
     /**
