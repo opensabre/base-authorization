@@ -8,10 +8,12 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/client")
@@ -24,7 +26,7 @@ public class RegisteredClientController {
 
     @Operation(summary = "新增客户端", description = "新增客户端client")
     @PostMapping
-    public Result save(@Parameter(description = "新增客户端client表单", required = true) RegisteredClientForm registeredClientForm) {
+    public Result save(@Parameter(description = "新增客户端client表单", required = true) @Valid @RequestBody RegisteredClientForm registeredClientForm) {
         oauth2RegisteredClientService.save(registeredClientForm);
         return Result.success();
     }

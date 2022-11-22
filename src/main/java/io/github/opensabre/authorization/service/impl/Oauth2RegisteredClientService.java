@@ -2,12 +2,10 @@ package io.github.opensabre.authorization.service.impl;
 
 import io.github.opensabre.authorization.entity.form.RegisteredClientForm;
 import io.github.opensabre.authorization.service.IOauth2RegisteredClientService;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.OAuth2TokenFormat;
-import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
@@ -25,12 +23,10 @@ import java.util.UUID;
 public class Oauth2RegisteredClientService implements IOauth2RegisteredClientService {
 
     @Resource
-    JdbcTemplate jdbcTemplate;
-
-    @Resource
     PasswordEncoder passwordEncoder;
 
-    JdbcRegisteredClientRepository jdbcRegisteredClientRepository = new JdbcRegisteredClientRepository(this.jdbcTemplate);
+    @Resource
+    JdbcRegisteredClientRepository registeredClientRepository;
 
     private RegisteredClient convertToRegisteredClient(RegisteredClientForm registeredClientForm) {
         RegisteredClient.Builder registeredClientBuilder = RegisteredClient.withId(UUID.randomUUID().toString())
@@ -38,9 +34,6 @@ public class Oauth2RegisteredClientService implements IOauth2RegisteredClientSer
                 .clientSecret(passwordEncoder.encode(registeredClientForm.getClientSecret()))
                 .clientSecretExpiresAt(Instant.now().plusSeconds(registeredClientForm.getClientSecretExpires()))
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-//                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-//                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-//                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .redirectUri(registeredClientForm.getRedirectUri())
                 .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
                 .tokenSettings(TokenSettings.builder()
@@ -56,7 +49,7 @@ public class Oauth2RegisteredClientService implements IOauth2RegisteredClientSer
                         .idTokenSignatureAlgorithm(SignatureAlgorithm.RS256).build()
                 );
         //设置scope
-        registeredClientBuilder.scopes(build -> registeredClientForm.getScopes());
+        registeredClientForm.getScopes().forEach(scope -> registeredClientBuilder.scope(scope));
         //设置gantType
         registeredClientForm.getGrantTypes().forEach(grantType -> {
             registeredClientBuilder.authorizationGrantType(new AuthorizationGrantType(grantType));
@@ -66,9 +59,9 @@ public class Oauth2RegisteredClientService implements IOauth2RegisteredClientSer
 
     @Override
     public void save(RegisteredClientForm registeredClientForm) {
-        Optional<RegisteredClient> clientOptional = Optional.ofNullable(jdbcRegisteredClientRepository.findByClientId(registeredClientForm.getClientId()));
+        Optional<RegisteredClient> clientOptional = Optional.ofNullable(registeredClientRepository.findByClientId(registeredClientForm.getClientId()));
         if (clientOptional.isEmpty()) {
-            jdbcRegisteredClientRepository.save(convertToRegisteredClient(registeredClientForm));
+            registeredClientRepository.save(convertToRegisteredClient(registeredClientForm));
         }
     }
 }
