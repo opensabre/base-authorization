@@ -8,6 +8,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
@@ -92,7 +93,7 @@ public class AuthorizationServerConfig {
             headers.header("abc", "123456");
 
             JwtClaimsSet.Builder claims = context.getClaims();
-            claims.claim("customs", "abcd");
+            claims.claim("roles", "abcd");
 
             Map<String, Object> map = claims.build().getClaims();
             //map.put("custom", "abc");
@@ -110,10 +111,12 @@ public class AuthorizationServerConfig {
      */
     @Bean
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(httpSecurity);
+        httpSecurity.authorizeRequests().antMatchers(HttpMethod.POST, "/client").permitAll();
+        httpSecurity.csrf().disable();
+        //OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(httpSecurity);
         //未通过身份验证异常时重定向到登录页面授权端点
         httpSecurity.exceptionHandling(
-                (exceptions) -> exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
+                //(exceptions) -> exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
         );
         return httpSecurity.build();
     }

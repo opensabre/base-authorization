@@ -33,6 +33,7 @@ CREATE TABLE oauth2_authorization
     PRIMARY KEY (id)
 ) COMMENT 'token记录表';
 
+DROP TABLE IF EXISTS oauth2_authorization_consent;
 CREATE TABLE oauth2_authorization_consent
 (
     registered_client_id varchar(100) NOT NULL COMMENT 'client_id',
@@ -41,19 +42,25 @@ CREATE TABLE oauth2_authorization_consent
     PRIMARY KEY (registered_client_id, principal_name)
 ) COMMENT '授权记录';
 
+DROP TABLE IF EXISTS oauth2_registered_client;
 CREATE TABLE oauth2_registered_client
 (
-    id                            varchar(100)                            NOT NULL COMMENT 'UUID生成',
-    client_id                     varchar(100)                            NOT NULL COMMENT 'client_id',
-    client_id_issued_at           datetime      DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT 'client生成时间',
-    client_secret                 varchar(200)  DEFAULT NULL COMMENT 'client密码',
-    client_secret_expires_at      datetime      DEFAULT NULL COMMENT 'client密码过期时间',
-    client_name                   varchar(200)                            NOT NULL COMMENT 'client名称',
-    client_authentication_methods varchar(1000)                           NOT NULL COMMENT '客户端支持的authentication_methods如：client_secret_basic、basic等',
-    authorization_grant_types     varchar(1000)                           NOT NULL COMMENT '客户端支持的grant_type如：refresh_token,client_credentials,authorization_code等',
-    redirect_uris                 varchar(1000) DEFAULT NULL COMMENT '跳转url',
-    scopes                        varchar(1000)                           NOT NULL COMMENT 'client支持的scope如:read、write等',
-    client_settings               text                                    NOT NULL COMMENT 'client设置如：过期时间',
-    token_settings                text                                    NOT NULL COMMENT 'token设置如：过期时间、类型等',
+    id                            varchar(100)  NOT NULL COMMENT 'UUID生成',
+    client_id                     varchar(100)  NOT NULL COMMENT 'client_id',
+    client_id_issued_at           datetime      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'client生成时间',
+    client_secret                 varchar(200)           DEFAULT NULL COMMENT 'client密码',
+    client_secret_expires_at      datetime               DEFAULT NULL COMMENT 'client密码过期时间',
+    client_name                   varchar(200)  NOT NULL COMMENT 'client名称',
+    client_authentication_methods varchar(1000) NOT NULL COMMENT '客户端支持的authentication_methods如：client_secret_basic、basic等',
+    authorization_grant_types     varchar(1000) NOT NULL COMMENT '客户端支持的grant_type如：refresh_token,client_credentials,authorization_code等',
+    redirect_uris                 varchar(1000)          DEFAULT NULL COMMENT '跳转url',
+    scopes                        varchar(1000) NOT NULL COMMENT 'client支持的scope如:read、write等',
+    client_settings               text          NOT NULL COMMENT 'client设置如：过期时间',
+    token_settings                text          NOT NULL COMMENT 'token设置如：过期时间、类型等',
+    deleted                       VARCHAR(1)    NOT NULL DEFAULT 'N' COMMENT '是否已删除Y：已删除，N：未删除',
+    created_time                  DATETIME      NOT NULL DEFAULT now() COMMENT '创建时间',
+    updated_time                  DATETIME      NOT NULL DEFAULT now() COMMENT '更新时间',
+    created_by                    VARCHAR(100)  NOT NULL COMMENT '创建人',
+    updated_by                    VARCHAR(100)  NOT NULL COMMENT '更新人',
     PRIMARY KEY (id)
 ) COMMENT 'client记录表';

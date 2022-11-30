@@ -1,67 +1,69 @@
 package io.github.opensabre.authorization.service.impl;
 
-import io.github.opensabre.authorization.entity.form.RegisteredClientForm;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import io.github.opensabre.authorization.dao.RegisteredClientMapper;
+import io.github.opensabre.authorization.entity.param.RegisteredClientQueryParam;
+import io.github.opensabre.authorization.entity.po.RegisteredClientPo;
 import io.github.opensabre.authorization.service.IOauth2RegisteredClientService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
-import org.springframework.security.oauth2.core.OAuth2TokenFormat;
-import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
-import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
-import org.springframework.security.oauth2.server.authorization.config.ClientSettings;
-import org.springframework.security.oauth2.server.authorization.config.TokenSettings;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.List;
 
 @Service
-public class Oauth2RegisteredClientService implements IOauth2RegisteredClientService {
+public class Oauth2RegisteredClientService extends ServiceImpl<RegisteredClientMapper, RegisteredClientPo> implements IOauth2RegisteredClientService {
 
     @Resource
     PasswordEncoder passwordEncoder;
 
-    @Resource
-    JdbcRegisteredClientRepository registeredClientRepository;
-
-    private RegisteredClient convertToRegisteredClient(RegisteredClientForm registeredClientForm) {
-        RegisteredClient.Builder registeredClientBuilder = RegisteredClient.withId(UUID.randomUUID().toString())
-                .clientId(registeredClientForm.getClientId())
-                .clientSecret(passwordEncoder.encode(registeredClientForm.getClientSecret()))
-                .clientSecretExpiresAt(Instant.now().plusSeconds(registeredClientForm.getClientSecretExpires()))
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                .redirectUri(registeredClientForm.getRedirectUri())
-                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
-                .tokenSettings(TokenSettings.builder()
-                        // token有效期5小时
-                        .accessTokenTimeToLive(Duration.ofHours(registeredClientForm.getAccessTokenTimeToLive()))
-                        // 使用默认JWT相关格式
-                        .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
-                        // 开启刷新token
-                        .reuseRefreshTokens(true)
-                        // refreshToken有效期120分钟
-                        .refreshTokenTimeToLive(Duration.ofDays(registeredClientForm.getRefreshTokenTimeToLive()))
-                        // idToken签名算法
-                        .idTokenSignatureAlgorithm(SignatureAlgorithm.RS256).build()
-                );
-        //设置scope
-        registeredClientForm.getScopes().forEach(scope -> registeredClientBuilder.scope(scope));
-        //设置gantType
-        registeredClientForm.getGrantTypes().forEach(grantType -> {
-            registeredClientBuilder.authorizationGrantType(new AuthorizationGrantType(grantType));
-        });
-        return registeredClientBuilder.build();
+    @Override
+    public boolean add(RegisteredClientPo registeredClientPo) {
+        //密码不为空，表示重新设置了密码，保存密码
+        if (StringUtils.isNotBlank(registeredClientPo.getClientSecret()))
+            registeredClientPo.setClientSecret(passwordEncoder.encode(registeredClientPo.getClientSecret()));
+        //保存
+        return this.save(registeredClientPo);
     }
 
     @Override
-    public void save(RegisteredClientForm registeredClientForm) {
-        Optional<RegisteredClient> clientOptional = Optional.ofNullable(registeredClientRepository.findByClientId(registeredClientForm.getClientId()));
-        if (clientOptional.isEmpty()) {
-            registeredClientRepository.save(convertToRegisteredClient(registeredClientForm));
-        }
+    public boolean update(RegisteredClientPo registeredClientPo) {
+        //密码不为空，表示重新设置了密码，保存密码
+        if (StringUtils.isNotBlank(registeredClientPo.getClientSecret()))
+            registeredClientPo.setClientSecret(passwordEncoder.encode(registeredClientPo.getClientSecret()));
+        //更新
+        return this.updateById(registeredClientPo);
+    }
+
+    @Override
+    public List<RegisteredClientPo> query(Page page, RegisteredClientQueryParam registeredClientQueryParam) {
+        QueryWrapper<RegisteredClientPo> queryWrapper = registeredClientQueryParam.build();
+        queryWrapper.eq(StringUtils.isNotBlank(registeredClientQueryParam.getClientId()), "client_id", registeredClientQueryParam.getClientId());
+        queryWrapper.eq(StringUtils.isNotBlank(registeredClientQueryParam.getClientId()), "client_name", registeredClientQueryParam.getClientId());
+        IPage<RegisteredClientPo> iPageUser = this.page(page, queryWrapper);
+        return iPageUser.getRecords();
+    }
+
+    @Override
+    public RegisteredClientPo get(String id) {
+        return this.getById(id);
+    }
+
+    @Override
+    public RegisteredClientPo getByClientId(String clientId) {
+        QueryWrapper<RegisteredClientPo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("client_id", clientId);
+        return this.getOne(queryWrapper);
+    }
+
+    @Override
+    public boolean disable(String id) {
+        RegisteredClientPo registeredClientPo = this.getById(id);
+        registeredClientPo.setDeleted("Y");
+        return this.updateById(registeredClientPo);
     }
 }
