@@ -47,7 +47,7 @@ CREATE TABLE oauth2_registered_client
 (
     id                            varchar(100)  NOT NULL COMMENT 'UUID生成',
     client_id                     varchar(100)  NOT NULL COMMENT 'client_id',
-    client_id_issued_at           datetime      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'client生成时间',
+    client_id_issued_at           datetime      NOT NULL DEFAULT now() COMMENT 'client生成时间',
     client_secret                 varchar(200)           DEFAULT NULL COMMENT 'client密码',
     client_secret_expires_at      datetime               DEFAULT NULL COMMENT 'client密码过期时间',
     client_name                   varchar(200)  NOT NULL COMMENT 'client名称',
@@ -64,3 +64,4 @@ CREATE TABLE oauth2_registered_client
     updated_by                    VARCHAR(100)  NOT NULL COMMENT '更新人',
     PRIMARY KEY (id)
 ) COMMENT 'client记录表';
+CREATE UNIQUE INDEX ux_client_id ON oauth2_registered_client (client_id);

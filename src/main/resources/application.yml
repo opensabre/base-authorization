@@ -16,7 +16,14 @@ spring:
       maximum-pool-size: 20
   mvc:
     throw-exception-if-no-handler-found: true
+  servlet:
+    multipart:
+      max-request-size: "2MB"
+      max-file-size: "2MB"
   cloud:
+    bus:
+      trace:
+        enabled: true
     loadbalancer:
       retry:
         enabled: true
@@ -25,12 +32,20 @@ spring:
       probability: 1.0
     feign:
       enabled: true
+  jackson:
+    time-zone: GMT+8
 
 feign:
   sentinel:
     enabled: true
   okhttp:
     enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
 
 logging:
   level:
@@ -43,12 +58,6 @@ logging:
       max-file-size: 1GB
   file:
     path: logs/
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: '*'
 
 mybatis-plus:
   configuration:

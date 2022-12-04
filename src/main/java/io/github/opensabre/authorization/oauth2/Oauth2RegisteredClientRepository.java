@@ -1,9 +1,9 @@
 package io.github.opensabre.authorization.oauth2;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import io.github.opensabre.authorization.dao.RegisteredClientMapper;
 import io.github.opensabre.authorization.entity.RegisteredClientConvert;
 import io.github.opensabre.authorization.entity.po.RegisteredClientPo;
+import io.github.opensabre.authorization.service.IOauth2RegisteredClientService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -11,31 +11,30 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import javax.annotation.Resource;
 
 @Configuration
+@Slf4j
 public class Oauth2RegisteredClientRepository implements RegisteredClientRepository {
 
     @Resource
-    RegisteredClientMapper registeredClientMapper;
+    IOauth2RegisteredClientService oauth2RegisteredClientService;
 
     @Resource
     RegisteredClientConvert registeredClientConvert;
 
+    @Deprecated
     @Override
     public void save(RegisteredClient registeredClient) {
-        RegisteredClientPo registeredClientPo = registeredClientConvert.convertToRegisteredClientPo(registeredClient);
-        registeredClientMapper.insert(registeredClientPo);
+        log.warn("请使用IOauth2RegisteredClientService相关方法，该实现废弃！");
     }
 
     @Override
     public RegisteredClient findById(String id) {
-        RegisteredClientPo registeredClientPo = registeredClientMapper.selectById(id);
+        RegisteredClientPo registeredClientPo = oauth2RegisteredClientService.get(id);
         return registeredClientConvert.convertToRegisteredClient(registeredClientPo);
     }
 
     @Override
     public RegisteredClient findByClientId(String clientId) {
-        QueryWrapper<RegisteredClientPo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.select("client_id", clientId);
-        RegisteredClientPo registeredClientPo = registeredClientMapper.selectOne(queryWrapper);
+        RegisteredClientPo registeredClientPo = oauth2RegisteredClientService.getByClientId(clientId);
         return registeredClientConvert.convertToRegisteredClient(registeredClientPo);
     }
 

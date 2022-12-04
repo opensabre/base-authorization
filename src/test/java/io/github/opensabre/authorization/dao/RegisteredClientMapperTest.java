@@ -2,16 +2,17 @@ package io.github.opensabre.authorization.dao;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.github.opensabre.authorization.entity.po.RegisteredClientPo;
-import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.oauth2.server.authorization.config.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.config.TokenSettings;
 
 import javax.annotation.Resource;
-
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 class RegisteredClientMapperTest {
@@ -30,8 +31,8 @@ class RegisteredClientMapperTest {
         registeredClientPo.setRedirectUris("https://github.com");
         registeredClientPo.setClientIdIssuedAt(Date.from(Instant.now()));
         registeredClientPo.setAuthorizationGrantTypes("client_credentials");
-        registeredClientPo.setClientSettings("clientSettings");
-        registeredClientPo.setTokenSettings("tokenSettings");
+        registeredClientPo.setClientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build().getSettings());
+        registeredClientPo.setTokenSettings(TokenSettings.builder().build().getSettings());
         registeredClientPo.setClientAuthenticationMethods("client_secret_basic");
         //执行
         int result = registeredClientMapper.insert(registeredClientPo);
@@ -50,7 +51,7 @@ class RegisteredClientMapperTest {
     }
 
     @Test
-    void testUpdateById(){
+    void testUpdateById() {
         RegisteredClientPo registeredClientPo = new RegisteredClientPo();
         registeredClientPo.setClientId("test_client1");
         registeredClientPo.setClientSecret("123456");
@@ -60,8 +61,8 @@ class RegisteredClientMapperTest {
         registeredClientPo.setRedirectUris("https://github.com");
         registeredClientPo.setClientIdIssuedAt(Date.from(Instant.now()));
         registeredClientPo.setAuthorizationGrantTypes("client_credentials");
-        registeredClientPo.setClientSettings("clientSettings");
-        registeredClientPo.setTokenSettings("tokenSettings");
+        registeredClientPo.setClientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build().getSettings());
+        registeredClientPo.setTokenSettings(TokenSettings.builder().accessTokenTimeToLive(Duration.ofHours(1L)).build().getSettings());
         registeredClientPo.setClientAuthenticationMethods("client_secret_basic");
         //执行
         int result = registeredClientMapper.updateById(registeredClientPo);

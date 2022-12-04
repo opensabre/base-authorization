@@ -62,8 +62,6 @@ public class Oauth2RegisteredClientService extends ServiceImpl<RegisteredClientM
 
     @Override
     public boolean disable(String id) {
-        RegisteredClientPo registeredClientPo = this.getById(id);
-        registeredClientPo.setDeleted("Y");
-        return this.updateById(registeredClientPo);
+        return this.removeById(id);
     }
 }

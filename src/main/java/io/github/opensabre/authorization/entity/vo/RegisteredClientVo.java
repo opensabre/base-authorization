@@ -17,18 +17,15 @@ import java.util.Set;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class RegisteredClientVo extends BaseVo<RegisteredClientPo> {
-
     private String id;
     private String clientId;
+    private String clientName;
     private Date clientIdIssuedAt;
     private Date clientSecretExpiresAt;
-    private String clientName;
-    private Set<ClientAuthenticationMethod> clientAuthenticationMethods;
-    private Set<AuthorizationGrantType> authorizationGrantTypes;
-    private String redirectUris;
-    private String scopes;
-    private ClientSettings clientSettings;
-    private TokenSettings tokenSettings;
+    private Set<String> clientAuthenticationMethods;
+    private Set<String> authorizationGrantTypes;
+    private Set<String> redirectUris;
+    private Set<String> scopes;
 }
 
 

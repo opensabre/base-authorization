@@ -34,12 +34,27 @@
             <groupId>io.github.opensabre</groupId>
             <artifactId>opensabre-base-starter</artifactId>
             <version>${opensabre-base-starter.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.github.opensabre</groupId>
+                    <artifactId>common-web</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!--测试框架-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.opensabre</groupId>
+            <artifactId>common-web</artifactId>
+            <version>0.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
         </dependency>
         <!--common-test测试框架-->
         <dependency>

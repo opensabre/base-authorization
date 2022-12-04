@@ -31,8 +31,12 @@ public class RegisteredClientForm extends BaseForm<RegisteredClientPo> {
     String clientSecret;
 
     @NotEmpty(message = "授权类型不能为空")
-    @Schema(title = "授权类型：")
+    @Schema(title = "授权类型")
     Set<String> grantTypes;
+
+    @NotEmpty(message = "客户端认证方法")
+    @Schema(title = "客户端认证方式")
+    Set<String> clientAuthenticationMethods;
 
     @NotEmpty(message = "授权范围不能为空")
     @Schema(title = "授权范围")

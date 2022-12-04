@@ -1,5 +1,6 @@
 package io.github.opensabre.authorization.entity;
 
+import com.alibaba.nacos.shaded.com.google.common.collect.Sets;
 import io.github.opensabre.authorization.entity.form.RegisteredClientForm;
 import io.github.opensabre.authorization.entity.po.RegisteredClientPo;
 import io.github.opensabre.authorization.entity.vo.RegisteredClientVo;
@@ -18,7 +19,6 @@ import javax.annotation.Resource;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.stream.Collectors;
 
 @Component
 public class RegisteredClientConvert {
@@ -35,11 +35,11 @@ public class RegisteredClientConvert {
     public RegisteredClient convertToRegisteredClient(RegisteredClientPo registeredClientPo) {
         RegisteredClient.Builder registeredClientBuilder = RegisteredClient.withId(registeredClientPo.getId())
                 .clientId(registeredClientPo.getClientId())
-                .clientSecret(passwordEncoder.encode(registeredClientPo.getClientSecret()))
+                .clientSecret(registeredClientPo.getClientSecret())
                 .clientSecretExpiresAt(registeredClientPo.getClientSecretExpiresAt().toInstant())
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .clientAuthenticationMethod(new ClientAuthenticationMethod(registeredClientPo.getClientAuthenticationMethods()))
                 .redirectUri(registeredClientPo.getRedirectUris())
-                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
+                .clientSettings(ClientSettings.withSettings(registeredClientPo.getClientSettings()).build())
                 .tokenSettings(TokenSettings.builder()
                                 // token有效期5小时
 //                        .accessTokenTimeToLive(registeredClientPo.getTokenSettings().getAccessTokenTimeToLive())
@@ -71,30 +71,17 @@ public class RegisteredClientConvert {
      */
     public RegisteredClientPo convertToRegisteredClientPo(RegisteredClientForm registeredClientForm) {
         RegisteredClientPo registeredClientPo = new RegisteredClientPo();
+        registeredClientPo.setId(registeredClientForm.getId());
         registeredClientPo.setClientId(registeredClientForm.getClientId());
         registeredClientPo.setClientName(registeredClientForm.getClientName());
         registeredClientPo.setClientSecret(registeredClientForm.getClientSecret());
         registeredClientPo.setRedirectUris(registeredClientForm.getRedirectUri());
         registeredClientPo.setClientSecretExpiresAt(Date.from(Instant.now().plusSeconds(registeredClientForm.getClientSecretExpires())));
         registeredClientPo.setAuthorizationGrantTypes(String.join(",", registeredClientForm.getGrantTypes()));
+        registeredClientPo.setClientAuthenticationMethods(String.join(",", registeredClientForm.getClientAuthenticationMethods()));
         registeredClientPo.setScopes(String.join(",", registeredClientForm.getScopes()));
-        return registeredClientPo;
-    }
-
-    /**
-     * 将RegisteredClient转为RegisteredClientPo，方便Dao存储
-     *
-     * @param registeredClient RegisteredClient对象实例
-     * @return RegisteredClientPo实例
-     */
-    public RegisteredClientPo convertToRegisteredClientPo(RegisteredClient registeredClient) {
-        RegisteredClientPo registeredClientPo = new RegisteredClientPo();
-        registeredClientPo.setClientId(registeredClient.getClientId());
-        registeredClientPo.setClientSecret(registeredClient.getClientSecret());
-        registeredClientPo.setClientName(registeredClient.getClientName());
-        registeredClientPo.setClientSecret(registeredClient.getClientSecret());
-        registeredClientPo.setAuthorizationGrantTypes(registeredClient.getAuthorizationGrantTypes().stream().map(AuthorizationGrantType::getValue).collect(Collectors.joining(",")));
-        registeredClientPo.setRedirectUris(registeredClient.getRedirectUris().stream().collect(Collectors.joining(",")));
+        registeredClientPo.setClientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build().getSettings());
+        registeredClientPo.setTokenSettings(TokenSettings.builder().build().getSettings());
         return registeredClientPo;
     }
 
@@ -109,7 +96,12 @@ public class RegisteredClientConvert {
         registeredClientVo.setId(registeredClientPo.getId());
         registeredClientVo.setClientId(registeredClientPo.getClientId());
         registeredClientVo.setClientName(registeredClientPo.getClientName());
-        registeredClientVo.setRedirectUris(registeredClientPo.getRedirectUris());
+        registeredClientVo.setClientIdIssuedAt(registeredClientPo.getClientIdIssuedAt());
+        registeredClientVo.setClientSecretExpiresAt(registeredClientPo.getClientSecretExpiresAt());
+        registeredClientVo.setScopes(Sets.newHashSet(StringUtils.split(registeredClientPo.getScopes(), ",")));
+        registeredClientVo.setRedirectUris(Sets.newHashSet(StringUtils.split(registeredClientPo.getRedirectUris(), ",")));
+        registeredClientVo.setAuthorizationGrantTypes(Sets.newHashSet(StringUtils.split(registeredClientPo.getAuthorizationGrantTypes(), ",")));
+        registeredClientVo.setClientAuthenticationMethods(Sets.newHashSet(StringUtils.split(registeredClientPo.getClientAuthenticationMethods(), ",")));
         return registeredClientVo;
     }
 
