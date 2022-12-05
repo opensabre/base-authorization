@@ -47,7 +47,7 @@ public class Oauth2RegisteredClientService extends ServiceImpl<RegisteredClientM
     public IPage<RegisteredClientVo> query(Page page, RegisteredClientQueryParam registeredClientQueryParam) {
         QueryWrapper<RegisteredClientPo> queryWrapper = registeredClientQueryParam.build();
         queryWrapper.eq(StringUtils.isNotBlank(registeredClientQueryParam.getClientId()), "client_id", registeredClientQueryParam.getClientId());
-        queryWrapper.eq(StringUtils.isNotBlank(registeredClientQueryParam.getClientId()), "client_name", registeredClientQueryParam.getClientName());
+        queryWrapper.eq(StringUtils.isNotBlank(registeredClientQueryParam.getClientName()), "client_name", registeredClientQueryParam.getClientName());
         IPage<RegisteredClientPo> iPage = this.page(page, queryWrapper);
         return iPage.convert(registeredClientConvert::convertToRegisteredClientVo);
     }
