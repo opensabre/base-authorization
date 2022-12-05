@@ -1,7 +1,6 @@
 package io.github.opensabre.authorization.oauth2;
 
 import io.github.opensabre.authorization.entity.RegisteredClientConvert;
-import io.github.opensabre.authorization.entity.po.RegisteredClientPo;
 import io.github.opensabre.authorization.service.IOauth2RegisteredClientService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -28,14 +27,12 @@ public class Oauth2RegisteredClientRepository implements RegisteredClientReposit
 
     @Override
     public RegisteredClient findById(String id) {
-        RegisteredClientPo registeredClientPo = oauth2RegisteredClientService.get(id);
-        return registeredClientConvert.convertToRegisteredClient(registeredClientPo);
+        return registeredClientConvert.convertToRegisteredClient(oauth2RegisteredClientService.get(id));
     }
 
     @Override
     public RegisteredClient findByClientId(String clientId) {
-        RegisteredClientPo registeredClientPo = oauth2RegisteredClientService.getByClientId(clientId);
-        return registeredClientConvert.convertToRegisteredClient(registeredClientPo);
+        return registeredClientConvert.convertToRegisteredClient(oauth2RegisteredClientService.getByClientId(clientId));
     }
 
 }
