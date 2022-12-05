@@ -5,21 +5,25 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.github.opensabre.authorization.dao.RegisteredClientMapper;
+import io.github.opensabre.authorization.entity.RegisteredClientConvert;
 import io.github.opensabre.authorization.entity.param.RegisteredClientQueryParam;
 import io.github.opensabre.authorization.entity.po.RegisteredClientPo;
+import io.github.opensabre.authorization.entity.vo.RegisteredClientVo;
 import io.github.opensabre.authorization.service.IOauth2RegisteredClientService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 @Service
 public class Oauth2RegisteredClientService extends ServiceImpl<RegisteredClientMapper, RegisteredClientPo> implements IOauth2RegisteredClientService {
 
     @Resource
     PasswordEncoder passwordEncoder;
+
+    @Resource
+    RegisteredClientConvert registeredClientConvert;
 
     @Override
     public boolean add(RegisteredClientPo registeredClientPo) {
@@ -40,12 +44,12 @@ public class Oauth2RegisteredClientService extends ServiceImpl<RegisteredClientM
     }
 
     @Override
-    public List<RegisteredClientPo> query(Page page, RegisteredClientQueryParam registeredClientQueryParam) {
+    public IPage<RegisteredClientVo> query(Page page, RegisteredClientQueryParam registeredClientQueryParam) {
         QueryWrapper<RegisteredClientPo> queryWrapper = registeredClientQueryParam.build();
         queryWrapper.eq(StringUtils.isNotBlank(registeredClientQueryParam.getClientId()), "client_id", registeredClientQueryParam.getClientId());
-        queryWrapper.eq(StringUtils.isNotBlank(registeredClientQueryParam.getClientId()), "client_name", registeredClientQueryParam.getClientId());
-        IPage<RegisteredClientPo> iPageUser = this.page(page, queryWrapper);
-        return iPageUser.getRecords();
+        queryWrapper.eq(StringUtils.isNotBlank(registeredClientQueryParam.getClientId()), "client_name", registeredClientQueryParam.getClientName());
+        IPage<RegisteredClientPo> iPage = this.page(page, queryWrapper);
+        return iPage.convert(registeredClientConvert::convertToRegisteredClientVo);
     }
 
     @Override

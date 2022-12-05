@@ -1,8 +1,10 @@
 package io.github.opensabre.authorization.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.github.opensabre.authorization.entity.param.RegisteredClientQueryParam;
 import io.github.opensabre.authorization.entity.po.RegisteredClientPo;
+import io.github.opensabre.authorization.entity.vo.RegisteredClientVo;
 
 import java.util.List;
 
@@ -24,10 +26,10 @@ public interface IOauth2RegisteredClientService {
     /**
      * 查询所有Client列表
      *
-     * @param registeredClientParam 查询参数
-     * @return List<RegisteredClientPo> Client列表
+     * @param registeredClientQueryParam 查询参数
+     * @return IPage<RegisteredClientVo> Client列表
      */
-    List<RegisteredClientPo> query(Page page, RegisteredClientQueryParam registeredClientParam);
+    IPage<RegisteredClientVo> query(Page page, RegisteredClientQueryParam registeredClientQueryParam);
 
     /**
      * 根据clientId获取对象

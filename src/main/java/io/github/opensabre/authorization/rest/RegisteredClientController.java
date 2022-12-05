@@ -1,7 +1,10 @@
 package io.github.opensabre.authorization.rest;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.github.opensabre.authorization.entity.RegisteredClientConvert;
 import io.github.opensabre.authorization.entity.form.RegisteredClientForm;
+import io.github.opensabre.authorization.entity.form.RegisteredClientQueryForm;
+import io.github.opensabre.authorization.entity.param.RegisteredClientQueryParam;
 import io.github.opensabre.authorization.entity.po.RegisteredClientPo;
 import io.github.opensabre.authorization.entity.vo.RegisteredClientVo;
 import io.github.opensabre.authorization.service.IOauth2RegisteredClientService;
@@ -20,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/client")
@@ -71,4 +76,13 @@ public class RegisteredClientController {
         return registeredClientConvert.convertToRegisteredClientVo(oauth2RegisteredClientService.getByClientId(clientId));
     }
 
+    @Operation(summary = "搜索客户端", description = "根据条件查询客户端信息")
+    @ApiResponses(
+            @ApiResponse(responseCode = "200", description = "处理成功", content = @Content(schema = @Schema(implementation = Result.class)))
+    )
+    @PostMapping(value = "/conditions")
+    public IPage<RegisteredClientVo> search(@Parameter(description = "客户端查询参数", required = true) @Valid @RequestBody RegisteredClientQueryForm registeredClientQueryForm) {
+        log.debug("search with registeredClientQueryForm:{}", registeredClientQueryForm);
+        return oauth2RegisteredClientService.query(registeredClientQueryForm.getPage(), registeredClientQueryForm.toParam(RegisteredClientQueryParam.class));
+    }
 }
