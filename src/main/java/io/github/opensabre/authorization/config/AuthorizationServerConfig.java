@@ -5,6 +5,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import io.github.opensabre.authorization.oauth2.Oauth2RegisteredClientRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,6 +41,9 @@ public class AuthorizationServerConfig {
 
     @Resource
     JdbcTemplate jdbcTemplate;
+
+    @Resource
+    Oauth2RegisteredClientRepository oauth2RegisteredClientRepository;
 
     /**
      * 用于密码加密
@@ -112,8 +116,7 @@ public class AuthorizationServerConfig {
     @Bean
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeRequests().antMatchers(HttpMethod.POST, "/client").permitAll();
-        httpSecurity.csrf().disable();
-        //OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(httpSecurity);
+        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(httpSecurity);
         //未通过身份验证异常时重定向到登录页面授权端点
         httpSecurity.exceptionHandling(
                 //(exceptions) -> exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
@@ -121,15 +124,6 @@ public class AuthorizationServerConfig {
         return httpSecurity.build();
     }
 
-    /**
-     * RegisteredClientRepository用于管理客户端的实例。操作oauth2_registered_client表
-     *
-     * @return
-     */
-    @Bean
-    public RegisteredClientRepository registeredClientRepository() {
-        return new JdbcRegisteredClientRepository(jdbcTemplate);
-    }
 
     /**
      * 操作oauth2_authorization表，token等相关信息表
@@ -138,7 +132,7 @@ public class AuthorizationServerConfig {
      */
     @Bean
     public OAuth2AuthorizationService authorizationService() {
-        return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository());
+        return new JdbcOAuth2AuthorizationService(jdbcTemplate, oauth2RegisteredClientRepository);
     }
 
     /**
@@ -146,7 +140,7 @@ public class AuthorizationServerConfig {
      */
     @Bean
     public OAuth2AuthorizationConsentService authorizationConsentService() {
-        return new JdbcOAuth2AuthorizationConsentService(jdbcTemplate, registeredClientRepository());
+        return new JdbcOAuth2AuthorizationConsentService(jdbcTemplate, oauth2RegisteredClientRepository);
     }
 
     /**

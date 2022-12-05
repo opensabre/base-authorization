@@ -6,8 +6,6 @@ import io.github.opensabre.authorization.entity.param.RegisteredClientQueryParam
 import io.github.opensabre.authorization.entity.po.RegisteredClientPo;
 import io.github.opensabre.authorization.entity.vo.RegisteredClientVo;
 
-import java.util.List;
-
 public interface IOauth2RegisteredClientService {
     /**
      * 新增
