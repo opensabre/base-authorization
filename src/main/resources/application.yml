@@ -1,4 +1,9 @@
+server:
+  port: 8000
+
 spring:
+  application:
+    name: base-authorization
   rabbitmq:
     host: ${RABBIT_MQ_HOST:localhost}
     port: ${RABBIT_MQ_PORT:5672}

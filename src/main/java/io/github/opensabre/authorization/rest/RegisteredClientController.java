@@ -62,7 +62,7 @@ public class RegisteredClientController {
     @Operation(summary = "获取客户端", description = "获取指定客户端信息")
     @GetMapping(value = "/{id}")
     public RegisteredClientVo get(@Parameter(name = "id", description = "客户端ID", required = true) @PathVariable String id) {
-        log.debug("get with id:{}", id);
+        log.info("get with id:{}", id);
         return registeredClientConvert.convertToRegisteredClientVo(oauth2RegisteredClientService.get(id));
     }
 
@@ -72,7 +72,7 @@ public class RegisteredClientController {
     )
     @GetMapping
     public RegisteredClientVo query(@Parameter(description = "客户端clientId", required = true) @RequestParam String clientId) {
-        log.debug("query with clientId:{}", clientId);
+        log.info("query with clientId:{}", clientId);
         return registeredClientConvert.convertToRegisteredClientVo(oauth2RegisteredClientService.getByClientId(clientId));
     }
 
@@ -82,7 +82,7 @@ public class RegisteredClientController {
     )
     @PostMapping(value = "/conditions")
     public IPage<RegisteredClientVo> search(@Parameter(description = "客户端查询参数", required = true) @Valid @RequestBody RegisteredClientQueryForm registeredClientQueryForm) {
-        log.debug("search with registeredClientQueryForm:{}", registeredClientQueryForm);
+        log.info("search with registeredClientQueryForm:{}", registeredClientQueryForm);
         return oauth2RegisteredClientService.query(registeredClientQueryForm.getPage(), registeredClientQueryForm.toParam(RegisteredClientQueryParam.class));
     }
 }

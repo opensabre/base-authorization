@@ -1,8 +1,4 @@
-server:
-  port: 8000
 spring:
-  application:
-    name: base-authorization
   cloud:
     nacos:
       discovery:

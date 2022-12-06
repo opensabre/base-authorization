@@ -115,11 +115,11 @@ public class AuthorizationServerConfig {
      */
     @Bean
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeRequests().antMatchers(HttpMethod.POST, "/client").permitAll();
+//        httpSecurity.authorizeRequests().antMatchers(HttpMethod.POST, "/client").permitAll();
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(httpSecurity);
         //未通过身份验证异常时重定向到登录页面授权端点
         httpSecurity.exceptionHandling(
-                //(exceptions) -> exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
+                //exceptions -> exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
         );
         return httpSecurity.build();
     }
