@@ -115,7 +115,7 @@ public class AuthorizationServerConfig {
      */
     @Bean
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
-//        httpSecurity.authorizeRequests().antMatchers(HttpMethod.POST, "/client").permitAll();
+        log.info("Init HttpSecurity for Oauth2");
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(httpSecurity);
         //未通过身份验证异常时重定向到登录页面授权端点
         httpSecurity.exceptionHandling(
@@ -123,7 +123,6 @@ public class AuthorizationServerConfig {
         );
         return httpSecurity.build();
     }
-
 
     /**
      * 操作oauth2_authorization表，token等相关信息表
