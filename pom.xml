@@ -24,7 +24,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <!--  依赖   -->
-        <spring-security-oauth2-authorization-server.version>1.2.2</spring-security-oauth2-authorization-server.version>
+        <spring-security-oauth2-authorization-server.version>1.2.3</spring-security-oauth2-authorization-server.version>
     </properties>
 
     <dependencies>
