@@ -51,7 +51,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Configuration(proxyBeanMethods = false)
+@Configuration
 public class AuthorizationServerConfig {
 
     @Resource
@@ -67,7 +67,7 @@ public class AuthorizationServerConfig {
      * 端点的 Spring Security 过滤器链
      *
      * @param httpSecurity
-     * @return
+     * @return SecurityFilterChain
      * @throws Exception
      */
     @Bean
@@ -83,12 +83,13 @@ public class AuthorizationServerConfig {
         };
         httpSecurity
                 .getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-                //设置客户端授权中失败的handler处理
+                // 设置客户端授权中失败的handler处理
                 .clientAuthentication((auth) -> auth.errorResponseHandler(new Oauth2FailureHandler()))
-                //token 相关配置 如  /oauth2/token接口
+                // token 相关配置 如:/oauth2/token接口
                 .tokenEndpoint((token) -> token.errorResponseHandler(new Oauth2FailureHandler()))
                 // Enable OpenID Connect 1.0
                 .oidc((oidc) -> {
+                    // /userinfo返回自定义用户信息
                     oidc.userInfoEndpoint((userInfo) -> {
                                 userInfo.userInfoMapper(userInfoMapper);
                                 userInfo.userInfoResponseHandler(new Oauth2SuccessHandler());
@@ -108,7 +109,7 @@ public class AuthorizationServerConfig {
     /**
      * 用于密码加密
      *
-     * @return
+     * @return 加密器
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -134,7 +135,7 @@ public class AuthorizationServerConfig {
     /**
      * token生成
      *
-     * @return
+     * @return token生成器
      */
     @Bean
     public OAuth2TokenGenerator<?> tokenGenerator() {
@@ -148,7 +149,7 @@ public class AuthorizationServerConfig {
     /**
      * 自定义JWT token内容
      *
-     * @return
+     * @return token自定义
      */
     @Bean
     public OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer() {

@@ -32,18 +32,18 @@ public class WebSecurityConfig {
     @Order(2)
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         log.info("Init HttpSecurity for Security");
-        //
+        // web站点基本安全配置
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults());
-        //
+        // url安全配置
         httpSecurity.authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
                         .requestMatchers("/doc.html", "/v3/**", "/webjars/**", "/assets/**")
                         .permitAll()
                         .requestMatchers("/client", "/client/**")
                         .authenticated());
-        //表单登录处理从授权服务器过滤器链
+        // 表单登录处理从授权服务器过滤器链
         httpSecurity
                 .formLogin(Customizer.withDefaults())
                 .userDetailsService(userDetailsService);

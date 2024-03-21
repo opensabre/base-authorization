@@ -10,6 +10,7 @@ CREATE TABLE oauth2_authorization
     registered_client_id          varchar(100) NOT NULL COMMENT 'clientId',
     principal_name                varchar(200) NOT NULL COMMENT '身份信息，一般为clientId',
     authorization_grant_type      varchar(100) NOT NULL COMMENT '客户端支持的grant_type如：refresh_token,client_credentials,authorization_code等',
+    authorized_scopes             varchar(1000) DEFAULT NULL COMMENT '客户',
     attributes                    blob          DEFAULT NULL COMMENT '其他属性',
     state                         varchar(500)  DEFAULT NULL COMMENT 'token状态',
     authorization_code_value      blob          DEFAULT NULL COMMENT '预授权码值',
@@ -25,11 +26,19 @@ CREATE TABLE oauth2_authorization
     oidc_id_token_value           blob          DEFAULT NULL COMMENT 'oidc_id_token值',
     oidc_id_token_issued_at       datetime      DEFAULT NULL COMMENT 'oidc_id_token生成时间',
     oidc_id_token_expires_at      datetime      DEFAULT NULL COMMENT 'oidc_id_token过期时间',
-    oidc_id_token_metadata        blob          DEFAULT NULL COMMENT 'oidc_id_token时间',
-    refresh_token_value           blob          DEFAULT NULL COMMENT 'refresh_token原数据，java实例',
+    oidc_id_token_metadata        blob          DEFAULT NULL COMMENT 'oidc_id_token元数据',
+    refresh_token_value           blob          DEFAULT NULL COMMENT 'refresh_token元数据，java实例',
     refresh_token_issued_at       datetime      DEFAULT NULL COMMENT 'refresh_token生成时间',
     refresh_token_expires_at      datetime      DEFAULT NULL COMMENT 'refresh_token过期时间',
-    refresh_token_metadata        blob          DEFAULT NULL COMMENT 'refresh_token原数据，java实例',
+    refresh_token_metadata        blob          DEFAULT NULL COMMENT 'refresh_token元数据，java实例',
+    user_code_value               blob          DEFAULT NULL COMMENT '用户授权码',
+    user_code_issued_at           datetime      DEFAULT NULL COMMENT '用户授权码生成时间',
+    user_code_expires_at          datetime      DEFAULT NULL COMMENT '用户授权码过期时间',
+    user_code_metadata            blob          DEFAULT NULL COMMENT '用户授权码元数据',
+    device_code_value             blob          DEFAULT NULL COMMENT '设备授权码',
+    device_code_issued_at         datetime      DEFAULT NULL COMMENT '设备授权码生成时间',
+    device_code_expires_at        datetime      DEFAULT NULL COMMENT '设备授权码过期时间',
+    device_code_metadata          blob          DEFAULT NULL COMMENT '设备授权码元数据',
     PRIMARY KEY (id)
 ) COMMENT 'token记录表';
 
@@ -38,7 +47,7 @@ CREATE TABLE oauth2_authorization_consent
 (
     registered_client_id varchar(100) NOT NULL COMMENT 'client_id',
     principal_name       varchar(200) NOT NULL COMMENT '身份信息，一般为clientId',
-    authorities          text         NOT NULL COMMENT '其他属性',
+    authorities          text         NOT NULL COMMENT '授权记录',
     PRIMARY KEY (registered_client_id, principal_name)
 ) COMMENT '授权记录';
 
@@ -54,14 +63,15 @@ CREATE TABLE oauth2_registered_client
     client_authentication_methods varchar(1000) NOT NULL COMMENT '客户端支持的authentication_methods如：client_secret_basic、basic等',
     authorization_grant_types     varchar(1000) NOT NULL COMMENT '客户端支持的grant_type如：refresh_token,client_credentials,authorization_code等',
     redirect_uris                 varchar(1000)          DEFAULT NULL COMMENT '跳转url',
+    post_logout_redirect_uris     varchar(1000)          DEFAULT NULL COMMENT '注销url',
     scopes                        varchar(1000) NOT NULL COMMENT 'client支持的scope如:read、write等',
     client_settings               text          NOT NULL COMMENT 'client设置如：过期时间',
     token_settings                text          NOT NULL COMMENT 'token设置如：过期时间、类型等',
-    deleted                       VARCHAR(1)    NOT NULL DEFAULT 'N' COMMENT '是否已删除Y：已删除，N：未删除',
-    created_time                  DATETIME      NOT NULL DEFAULT now() COMMENT '创建时间',
-    updated_time                  DATETIME      NOT NULL DEFAULT now() COMMENT '更新时间',
-    created_by                    VARCHAR(100)  NOT NULL COMMENT '创建人',
-    updated_by                    VARCHAR(100)  NOT NULL COMMENT '更新人',
+    deleted                       varchar(1)    NOT NULL DEFAULT 'N' COMMENT '是否已删除Y：已删除，N：未删除',
+    created_time                  datetime      NOT NULL DEFAULT now() COMMENT '创建时间',
+    updated_time                  datetime      NOT NULL DEFAULT now() COMMENT '更新时间',
+    created_by                    varchar(100)  NOT NULL COMMENT '创建人',
+    updated_by                    varchar(100)  NOT NULL COMMENT '更新人',
     PRIMARY KEY (id)
 ) COMMENT 'client记录表';
 CREATE UNIQUE INDEX ux_client_id ON oauth2_registered_client (client_id);
