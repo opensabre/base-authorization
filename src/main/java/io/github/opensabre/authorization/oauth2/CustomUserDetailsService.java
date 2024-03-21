@@ -4,6 +4,7 @@ import io.github.opensabre.authorization.entity.Role;
 import io.github.opensabre.authorization.entity.User;
 import io.github.opensabre.authorization.service.IRoleService;
 import io.github.opensabre.authorization.service.IUserService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,7 +12,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.Set;
 import java.util.stream.Collectors;
 

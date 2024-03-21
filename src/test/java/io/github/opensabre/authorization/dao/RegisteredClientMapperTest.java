@@ -2,12 +2,12 @@ package io.github.opensabre.authorization.dao;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.github.opensabre.authorization.entity.po.RegisteredClientPo;
+import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.oauth2.server.authorization.config.ClientSettings;
-import org.springframework.security.oauth2.server.authorization.config.TokenSettings;
+import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 
-import javax.annotation.Resource;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;

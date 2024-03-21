@@ -2,15 +2,14 @@ package io.github.opensabre.authorization.oauth2;
 
 import io.github.opensabre.authorization.entity.RegisteredClientConvert;
 import io.github.opensabre.authorization.service.IOauth2RegisteredClientService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 
-import javax.annotation.Resource;
-
-@Configuration
 @Slf4j
+@Configuration
 public class Oauth2RegisteredClientRepository implements RegisteredClientRepository {
 
     @Resource
@@ -34,5 +33,4 @@ public class Oauth2RegisteredClientRepository implements RegisteredClientReposit
     public RegisteredClient findByClientId(String clientId) {
         return registeredClientConvert.convertToRegisteredClient(oauth2RegisteredClientService.getByClientId(clientId));
     }
-
 }

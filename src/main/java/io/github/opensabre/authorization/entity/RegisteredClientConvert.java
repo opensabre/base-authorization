@@ -1,24 +1,26 @@
 package io.github.opensabre.authorization.entity;
 
-import com.alibaba.nacos.shaded.com.google.common.collect.Sets;
+import com.google.common.collect.Sets;
 import io.github.opensabre.authorization.entity.form.RegisteredClientForm;
 import io.github.opensabre.authorization.entity.po.RegisteredClientPo;
 import io.github.opensabre.authorization.entity.vo.RegisteredClientVo;
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
-import org.springframework.security.oauth2.core.OAuth2TokenFormat;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
-import org.springframework.security.oauth2.server.authorization.config.ClientSettings;
-import org.springframework.security.oauth2.server.authorization.config.TokenSettings;
+import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class RegisteredClientConvert {
@@ -33,12 +35,30 @@ public class RegisteredClientConvert {
      * @return RegisteredClient
      */
     public RegisteredClient convertToRegisteredClient(RegisteredClientPo registeredClientPo) {
+        // 构建scope
+        Set<String> scopes = Arrays.stream(StringUtils.split(registeredClientPo.getScopes(), ","))
+                .collect(Collectors.toSet());
+        // 构建scope
+        Set<String> redirectUris = Arrays.stream(StringUtils.split(registeredClientPo.getRedirectUris(), ","))
+                .collect(Collectors.toSet());
+        // 构建gantType
+        Set<AuthorizationGrantType> grantTypes = Arrays.stream(StringUtils.split(registeredClientPo.getAuthorizationGrantTypes(), ","))
+                .map(AuthorizationGrantType::new)
+                .collect(Collectors.toSet());
+        // 构建method
+        Set<ClientAuthenticationMethod> methods = Arrays.stream(StringUtils.split(registeredClientPo.getClientAuthenticationMethods(), ","))
+                .map(ClientAuthenticationMethod::new)
+                .collect(Collectors.toSet());
+        // 构建 RegisteredClient对象
         RegisteredClient.Builder registeredClientBuilder = RegisteredClient.withId(registeredClientPo.getId())
                 .clientId(registeredClientPo.getClientId())
                 .clientSecret(registeredClientPo.getClientSecret())
+                .clientName(registeredClientPo.getClientName())
                 .clientSecretExpiresAt(registeredClientPo.getClientSecretExpiresAt().toInstant())
-                .clientAuthenticationMethod(new ClientAuthenticationMethod(registeredClientPo.getClientAuthenticationMethods()))
-                .redirectUri(registeredClientPo.getRedirectUris())
+                .redirectUris(uris -> uris.addAll(redirectUris))
+                .clientAuthenticationMethods(methodSet -> methodSet.addAll(methods))
+                .scopes(scopeSet -> scopeSet.addAll(scopes))
+                .authorizationGrantTypes(grantType -> grantType.addAll(grantTypes))
                 .clientSettings(ClientSettings.withSettings(registeredClientPo.getClientSettings()).build())
                 .tokenSettings(TokenSettings.builder()
                                 // token有效期5小时
@@ -52,14 +72,6 @@ public class RegisteredClientConvert {
                                 // idToken签名算法
                                 .idTokenSignatureAlgorithm(SignatureAlgorithm.RS256).build()
                 );
-        //设置scope
-        Arrays.stream(StringUtils.split(registeredClientPo.getScopes(), ","))
-                .forEach(registeredClientBuilder::scope);
-        //设置gantType
-        Arrays.stream(StringUtils.split(registeredClientPo.getAuthorizationGrantTypes(), ","))
-                .forEach(grantType -> {
-                    registeredClientBuilder.authorizationGrantType(new AuthorizationGrantType(grantType));
-                });
         return registeredClientBuilder.build();
     }
 

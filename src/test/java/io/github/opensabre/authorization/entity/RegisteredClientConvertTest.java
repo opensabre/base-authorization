@@ -2,13 +2,12 @@ package io.github.opensabre.authorization.entity;
 
 import io.github.opensabre.authorization.entity.form.RegisteredClientForm;
 import io.github.opensabre.authorization.entity.po.RegisteredClientPo;
+import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.util.collections.Sets;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.annotation.Resource;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 class RegisteredClientConvertTest {

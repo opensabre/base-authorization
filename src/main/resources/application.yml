@@ -1,9 +1,4 @@
-server:
-  port: 8000
-
 spring:
-  application:
-    name: base-authorization
   rabbitmq:
     host: ${RABBIT_MQ_HOST:localhost}
     port: ${RABBIT_MQ_PORT:5672}
@@ -19,34 +14,8 @@ spring:
       idle-timeout: 600000
       max-lifetime: 1800000
       maximum-pool-size: 20
-  mvc:
-    throw-exception-if-no-handler-found: true
-  servlet:
-    multipart:
-      max-request-size: "2MB"
-      max-file-size: "2MB"
-  cloud:
-    bus:
-      trace:
-        enabled: true
-    loadbalancer:
-      retry:
-        enabled: true
-  sleuth:
-    sampler:
-      probability: 1.0
-    feign:
-      enabled: true
-  jackson:
-    time-zone: GMT+8
   main:
     allow-circular-references: true
-
-feign:
-  sentinel:
-    enabled: true
-  okhttp:
-    enabled: true
 
 management:
   endpoints:
@@ -56,21 +25,17 @@ management:
 
 logging:
   level:
-    org.springframework.web: debug
-    org.springframework.security: DEBUG
     org.apache.ibatis: debug
     java.sql.PreparedStatement: debug
-  logback:
-    rollingpolicy:
-      max-file-size: 1GB
-  file:
-    path: logs/
+    org.springframework.web: debug
+    org.springframework.security: debug
+    org.springframework.security.oauth2: debug
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: trace
+    org.springframework.security.web.FilterChainProxy: trace # 过滤器执行顺序
+    org.springframework.security.web.access.ExceptionTranslationFilter: trace #异常处理
 
 mybatis-plus:
-  configuration:
-    map-underscore-to-camel-case: true
   global-config:
     db-config:
-      logic-delete-value: "Y" # 逻辑已删除值(默认为 Y)
-      logic-not-delete-value: "N" # 逻辑未删除值(默认为 N)
       table-prefix: oauth2_
+

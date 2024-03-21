@@ -1,42 +1,57 @@
 package io.github.opensabre.authorization.config;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import io.github.opensabre.authorization.oauth2.Oauth2FailureHandler;
 import io.github.opensabre.authorization.oauth2.Oauth2RegisteredClientRepository;
+import io.github.opensabre.authorization.oauth2.Oauth2SuccessHandler;
+import io.github.opensabre.authorization.service.IUserService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationConsentService;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
-import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.config.ProviderSettings;
+import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
+import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.oauth2.server.authorization.oidc.authentication.OidcUserInfoAuthenticationContext;
+import org.springframework.security.oauth2.server.authorization.oidc.authentication.OidcUserInfoAuthenticationToken;
+import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.token.*;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
-import javax.annotation.Resource;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Map;
+import java.util.Collections;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class AuthorizationServerConfig {
 
     @Resource
@@ -44,6 +59,51 @@ public class AuthorizationServerConfig {
 
     @Resource
     Oauth2RegisteredClientRepository oauth2RegisteredClientRepository;
+
+    @Resource
+    private IUserService userService;
+
+    /**
+     * 端点的 Spring Security 过滤器链
+     *
+     * @param httpSecurity
+     * @return
+     * @throws Exception
+     */
+    @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE)
+    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        log.info("Init HttpSecurity for Oauth2");
+        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(httpSecurity);
+        // 自定义用户映射器
+        Function<OidcUserInfoAuthenticationContext, OidcUserInfo> userInfoMapper = (context) -> {
+            OidcUserInfoAuthenticationToken authentication = context.getAuthentication();
+            JwtAuthenticationToken principal = (JwtAuthenticationToken) authentication.getPrincipal();
+            return new OidcUserInfo(BeanUtil.beanToMap(userService.getByUniqueId(principal.getName())));
+        };
+        httpSecurity
+                .getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+                //设置客户端授权中失败的handler处理
+                .clientAuthentication((auth) -> auth.errorResponseHandler(new Oauth2FailureHandler()))
+                //token 相关配置 如  /oauth2/token接口
+                .tokenEndpoint((token) -> token.errorResponseHandler(new Oauth2FailureHandler()))
+                // Enable OpenID Connect 1.0
+                .oidc((oidc) -> {
+                    oidc.userInfoEndpoint((userInfo) -> {
+                                userInfo.userInfoMapper(userInfoMapper);
+                                userInfo.userInfoResponseHandler(new Oauth2SuccessHandler());
+                            }
+                    );
+                });
+        // 未通过身份验证异常时重定向到登录页面授权端点
+        httpSecurity.exceptionHandling((exceptions) -> exceptions.defaultAuthenticationEntryPointFor(
+                new LoginUrlAuthenticationEntryPoint("/login"),
+                new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
+        ));
+        //
+        httpSecurity.oauth2ResourceServer((resourceServer) -> resourceServer.jwt(Customizer.withDefaults()));
+        return httpSecurity.build();
+    }
 
     /**
      * 用于密码加密
@@ -93,35 +153,14 @@ public class AuthorizationServerConfig {
     @Bean
     public OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer() {
         return context -> {
-            JwsHeader.Builder headers = context.getHeaders();
-            headers.header("abc", "123456");
-
             JwtClaimsSet.Builder claims = context.getClaims();
-            claims.claim("roles", "abcd");
-
-            Map<String, Object> map = claims.build().getClaims();
-            //map.put("custom", "abc");
-
+            Set<String> roles = AuthorityUtils.authorityListToSet(context.getPrincipal().getAuthorities())
+                    .stream()
+                    .map(c -> c.replaceFirst("^ROLE_", ""))
+                    .collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
+            claims.claim("roles", roles);
             log.info("context:{}", context);
         };
-    }
-
-    /**
-     * 端点的 Spring Security 过滤器链
-     *
-     * @param httpSecurity
-     * @return
-     * @throws Exception
-     */
-    @Bean
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        log.info("Init HttpSecurity for Oauth2");
-        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(httpSecurity);
-        //未通过身份验证异常时重定向到登录页面授权端点
-        httpSecurity.exceptionHandling(
-                //exceptions -> exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
-        );
-        return httpSecurity.build();
     }
 
     /**
@@ -178,12 +217,12 @@ public class AuthorizationServerConfig {
     }
 
     /**
-     * ProviderSettings配置 Spring Authorization Server的实例
+     * AuthorizationServerSettings配置 Spring Authorization Server的实例
      *
-     * @return ProviderSettings
+     * @return AuthorizationServerSettings
      */
     @Bean
-    public ProviderSettings providerSettings() {
-        return ProviderSettings.builder().build();
+    public AuthorizationServerSettings authorizationServerSettings() {
+        return AuthorizationServerSettings.builder().build();
     }
 }

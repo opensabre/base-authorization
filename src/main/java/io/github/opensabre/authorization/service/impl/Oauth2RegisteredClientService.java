@@ -10,11 +10,10 @@ import io.github.opensabre.authorization.entity.param.RegisteredClientQueryParam
 import io.github.opensabre.authorization.entity.po.RegisteredClientPo;
 import io.github.opensabre.authorization.entity.vo.RegisteredClientVo;
 import io.github.opensabre.authorization.service.IOauth2RegisteredClientService;
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 
 @Service
 public class Oauth2RegisteredClientService extends ServiceImpl<RegisteredClientMapper, RegisteredClientPo> implements IOauth2RegisteredClientService {
@@ -45,7 +44,7 @@ public class Oauth2RegisteredClientService extends ServiceImpl<RegisteredClientM
 
     @Override
     public IPage<RegisteredClientVo> query(Page page, RegisteredClientQueryParam registeredClientQueryParam) {
-        QueryWrapper<RegisteredClientPo> queryWrapper = registeredClientQueryParam.build();
+        QueryWrapper<RegisteredClientPo> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq(StringUtils.isNotBlank(registeredClientQueryParam.getClientId()), "client_id", registeredClientQueryParam.getClientId());
         queryWrapper.eq(StringUtils.isNotBlank(registeredClientQueryParam.getClientName()), "client_name", registeredClientQueryParam.getClientName());
         IPage<RegisteredClientPo> iPage = this.page(page, queryWrapper);

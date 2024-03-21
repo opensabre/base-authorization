@@ -15,11 +15,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-
-import javax.annotation.Resource;
-import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/client")
@@ -36,7 +35,7 @@ public class RegisteredClientController {
     @Operation(summary = "新增客户端", description = "新增客户端client")
     @PostMapping
     public Boolean add(@Parameter(description = "新增客户端client表单", required = true) @Valid @RequestBody RegisteredClientForm registeredClientForm) {
-        log.info("disable with clientId:{}", registeredClientForm.getClientId());
+        log.info("add with clientId:{}", registeredClientForm.getClientId());
         return oauth2RegisteredClientService.add(registeredClientConvert.convertToRegisteredClientPo(registeredClientForm));
     }
 
@@ -52,17 +51,18 @@ public class RegisteredClientController {
     public Boolean update(@Parameter(description = "客户端ID", required = true) @PathVariable String id,
                           @Parameter(description = "客户端实体", required = true) @Valid @RequestBody RegisteredClientForm registeredClientForm) {
         log.info("update with id:{}", id);
+        registeredClientForm.setId(id);
         return oauth2RegisteredClientService.update(registeredClientConvert.convertToRegisteredClientPo(registeredClientForm));
     }
 
-    @Operation(summary = "获取客户端", description = "获取指定客户端信息")
+    @Operation(summary = "获取客户端", description = "根据id获取客户端信息")
     @GetMapping(value = "/{id}")
     public RegisteredClientVo get(@Parameter(name = "id", description = "客户端ID", required = true) @PathVariable String id) {
         log.info("get with id:{}", id);
         return registeredClientConvert.convertToRegisteredClientVo(oauth2RegisteredClientService.get(id));
     }
 
-    @Operation(summary = "根据clientId获客户端信息", description = "根据clientId获客户端信息")
+    @Operation(summary = "根据clientId获客户端信息", description = "根据clientId获取客户端信息")
     @ApiResponses(
             @ApiResponse(responseCode = "200", description = "处理成功", content = @Content(schema = @Schema(implementation = Result.class)))
     )

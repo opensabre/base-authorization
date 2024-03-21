@@ -1,7 +1,7 @@
 package io.github.opensabre.authorization.entity.form;
 
 import io.github.opensabre.authorization.entity.param.RegisteredClientQueryParam;
-import io.github.opensabre.common.web.entity.form.BaseQueryForm;
+import io.github.opensabre.persistence.entity.form.BaseQueryForm;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
