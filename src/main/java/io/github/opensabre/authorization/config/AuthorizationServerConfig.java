@@ -66,9 +66,9 @@ public class AuthorizationServerConfig {
     /**
      * 端点的 Spring Security 过滤器链
      *
-     * @param httpSecurity
+     * @param httpSecurity Spring Security 过滤器链
      * @return SecurityFilterChain
-     * @throws Exception
+     * @throws Exception 初使化异常
      */
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -104,16 +104,6 @@ public class AuthorizationServerConfig {
         //
         httpSecurity.oauth2ResourceServer((resourceServer) -> resourceServer.jwt(Customizer.withDefaults()));
         return httpSecurity.build();
-    }
-
-    /**
-     * 用于密码加密
-     *
-     * @return 加密器
-     */
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
     /**

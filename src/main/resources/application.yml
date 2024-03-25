@@ -14,8 +14,6 @@ spring:
       idle-timeout: 600000
       max-lifetime: 1800000
       maximum-pool-size: 20
-  main:
-    allow-circular-references: true
 
 management:
   endpoints:

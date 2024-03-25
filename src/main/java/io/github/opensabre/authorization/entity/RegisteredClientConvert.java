@@ -25,9 +25,6 @@ import java.util.stream.Collectors;
 @Component
 public class RegisteredClientConvert {
 
-    @Resource
-    PasswordEncoder passwordEncoder;
-
     /**
      * RegisteredClientPo转换为RegisteredClient
      *
