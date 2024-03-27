@@ -1,4 +1,4 @@
-package io.github.opensabre.authorization.oauth2;
+package io.github.opensabre.authorization.oauth2.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.opensabre.authorization.exception.AuthErrorType;
@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Component
@@ -32,8 +33,9 @@ public class Oauth2FailureHandler implements AuthenticationFailureHandler {
             message = exception.getMessage();
         }
 
-        response.setContentType(MediaType.APPLICATION_JSON_UTF8.toString());
-        response.setStatus(HttpStatus.OK.value());
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setContentType(MediaType.APPLICATION_JSON.toString());
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.getWriter().write(new ObjectMapper().writeValueAsString(Result.fail(AuthErrorType.UNAUTHORIZED, message)));
         response.getWriter().flush();
     }

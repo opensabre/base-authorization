@@ -24,9 +24,9 @@ public class WebSecurityConfig {
     /**
      * 用于身份验证的 Spring Security 过滤器链
      *
-     * @param httpSecurity
+     * @param httpSecurity Spring Security 过滤器链
      * @return SecurityFilterChain
-     * @throws Exception
+     * @throws Exception Security
      */
     @Bean
     @Order(2)

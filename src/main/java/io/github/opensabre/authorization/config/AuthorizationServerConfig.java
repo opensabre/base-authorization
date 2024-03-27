@@ -6,9 +6,10 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import io.github.opensabre.authorization.oauth2.Oauth2FailureHandler;
+import io.github.opensabre.authorization.oauth2.handler.Oauth2AccessDeniedHandler;
+import io.github.opensabre.authorization.oauth2.handler.Oauth2FailureHandler;
 import io.github.opensabre.authorization.oauth2.Oauth2RegisteredClientRepository;
-import io.github.opensabre.authorization.oauth2.Oauth2SuccessHandler;
+import io.github.opensabre.authorization.oauth2.handler.Oauth2SuccessHandler;
 import io.github.opensabre.authorization.service.IUserService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +22,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
-import org.springframework.security.oauth2.jwt.*;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationConsentService;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
@@ -102,7 +104,10 @@ public class AuthorizationServerConfig {
                 new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
         ));
         //
-        httpSecurity.oauth2ResourceServer((resourceServer) -> resourceServer.jwt(Customizer.withDefaults()));
+        httpSecurity.oauth2ResourceServer((resourceServer) -> resourceServer
+                .jwt(Customizer.withDefaults())
+                .accessDeniedHandler(new Oauth2AccessDeniedHandler())
+        );
         return httpSecurity.build();
     }
 

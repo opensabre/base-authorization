@@ -1,12 +1,9 @@
-package io.github.opensabre.authorization.oauth2;
+package io.github.opensabre.authorization.oauth2.handler;
 
-import cn.hutool.core.util.CharsetUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.opensabre.common.core.entity.vo.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.lang3.CharSet;
-import org.apache.commons.lang3.CharSetUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -15,6 +12,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class Oauth2SuccessHandler implements AuthenticationSuccessHandler {
@@ -23,8 +21,8 @@ public class Oauth2SuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException {
         OidcUserInfoAuthenticationToken userInfoAuthenticationToken = (OidcUserInfoAuthenticationToken) authentication;
-
-        response.setContentType(MediaType.APPLICATION_JSON_UTF8.toString());
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setContentType(MediaType.APPLICATION_JSON.toString());
         response.setStatus(HttpStatus.OK.value());
         response.getWriter().write(new ObjectMapper().writeValueAsString(Result.success(userInfoAuthenticationToken.getUserInfo())));
         response.getWriter().flush();
