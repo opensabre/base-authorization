@@ -39,13 +39,13 @@ public class WebSecurityConfig {
         // url安全配置
         httpSecurity.authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
-                        .requestMatchers("/doc.html", "/v3/**", "/webjars/**", "/assets/**")
+                        .requestMatchers("/doc.html", "/v3/**", "/webjars/**", "/assets/**", "/login")
                         .permitAll()
                         .requestMatchers("/client", "/client/**")
                         .authenticated());
         // 表单登录处理从授权服务器过滤器链
         httpSecurity
-                .formLogin(Customizer.withDefaults())
+                .formLogin(formLogin -> formLogin.loginPage("/login"))
                 .userDetailsService(userDetailsService);
         return httpSecurity.build();
     }

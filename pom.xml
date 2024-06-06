@@ -25,6 +25,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <!--  依赖   -->
         <spring-security-oauth2-authorization-server.version>1.2.2</spring-security-oauth2-authorization-server.version>
+        <bootstrap.version>5.3.3</bootstrap.version>
     </properties>
 
     <dependencies>
@@ -40,6 +41,19 @@
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>webjars-locator-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>bootstrap</artifactId>
+            <version>${bootstrap.version}</version>
         </dependency>
         <!--测试框架-->
         <dependency>
@@ -70,15 +84,22 @@
                     <classifier>exec</classifier>
                 </configuration>
             </plugin>
-            <!--docker镜像构建-->
             <plugin>
-                <groupId>com.spotify</groupId>
-                <artifactId>dockerfile-maven-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <parameters>true</parameters>
+                </configuration>
             </plugin>
             <!-- git commit插件 -->
             <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
+            </plugin>
+            <!--docker镜像构建-->
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

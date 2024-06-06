@@ -1,4 +1,4 @@
-FROM openjdk:11-jre-slim
+FROM openjdk:23-slim
 # 添加参数
 ARG JAR_FILE
 ADD target/${JAR_FILE} app.jar

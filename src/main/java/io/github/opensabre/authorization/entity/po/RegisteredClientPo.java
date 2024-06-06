@@ -5,11 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import io.github.opensabre.authorization.entity.vo.RegisteredClientVo;
 import io.github.opensabre.persistence.entity.po.BasePo;
 import lombok.*;
@@ -29,6 +25,7 @@ public class RegisteredClientPo extends BasePo<RegisteredClientVo> {
         objectMapper.registerModule(new JavaTimeModule());
         JacksonTypeHandler.setObjectMapper(objectMapper);
     }
+
     private String clientId;
     private Date clientIdIssuedAt;
     private String clientSecret;
