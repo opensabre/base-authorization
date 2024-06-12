@@ -85,7 +85,7 @@ public class RegisteredClientConvert {
         registeredClientPo.setRedirectUris(registeredClientForm.getRedirectUri());
         registeredClientPo.setClientSecretExpiresAt(Date.from(Instant.now().plusSeconds(registeredClientForm.getClientSecretExpires())));
         registeredClientPo.setAuthorizationGrantTypes(String.join(",", registeredClientForm.getGrantTypes()));
-        registeredClientPo.setClientAuthenticationMethods(String.join(",", registeredClientForm.getClientAuthenticationMethods()));
+        registeredClientPo.setClientAuthenticationMethods(StringUtils.join(registeredClientForm.getClientAuthenticationMethods(), ","));
         registeredClientPo.setScopes(String.join(",", registeredClientForm.getScopes()));
         registeredClientPo.setClientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build().getSettings());
         registeredClientPo.setTokenSettings(TokenSettings.builder().build().getSettings());

@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Set;
 
@@ -54,6 +55,24 @@ public class RegisteredClientForm extends BaseForm<RegisteredClientPo> {
 
     @Schema(title = "refreshToken有效期，单位秒")
     Long refreshTokenTimeToLive;
+
+    @Override
+    public RegisteredClientPo toPo(Class<RegisteredClientPo> clazz) {
+        RegisteredClientPo registeredClientPo = super.toPo(clazz);
+        registeredClientPo.setScopes(getJoinStr(this.scopes));
+        registeredClientPo.setAuthorizationGrantTypes(getJoinStr(this.grantTypes));
+        registeredClientPo.setClientAuthenticationMethods(getJoinStr(this.clientAuthenticationMethods));
+        registeredClientPo.setRedirectUris(String.join(",", this.redirectUri));
+        return registeredClientPo;
+    }
+
+    /**
+     * @param sets
+     * @return
+     */
+    private String getJoinStr(Set<String> sets) {
+        return StringUtils.join(sets, ",");
+    }
 
     interface Create {
     }

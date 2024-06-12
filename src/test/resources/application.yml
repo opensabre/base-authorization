@@ -4,29 +4,13 @@ spring:
     username: root
     password: root123
     driver-class-name: org.h2.Driver
-  mvc:
-    throw-exception-if-no-handler-found: true
   cloud:
     loadbalancer:
       retry:
         enabled: true
-  sleuth:
-    sampler:
-      probability: 1.0
-    feign:
-      enabled: true
   flyway:
     locations: classpath:.
     baseline-on-migrate: true
-  devtools:
-    livereload:
-      enabled: true
-
-feign:
-  sentinel:
-    enabled: true
-  okhttp:
-    enabled: true
 
 logging:
   level:
@@ -40,12 +24,6 @@ logging:
   logback:
     rollingpolicy:
       max-file-size: 1GB
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: '*'
 
 mybatis-plus:
   configuration:

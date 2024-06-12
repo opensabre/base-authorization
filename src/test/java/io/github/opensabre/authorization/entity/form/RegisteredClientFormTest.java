@@ -17,12 +17,37 @@ class RegisteredClientFormTest {
         registeredClientForm.setAccessTokenTimeToLive(7200L);
         registeredClientForm.setGrantTypes(Sets.newSet("password","client_credentials"));
         registeredClientForm.setScopes(Sets.newSet("read","write"));
+        registeredClientForm.setRedirectUri("http://localhost:8080");
+        registeredClientForm.setClientAuthenticationMethods(Sets.newSet("test"));
         //执行
         RegisteredClientPo registeredClientPo = registeredClientForm.toPo(RegisteredClientPo.class);
         //验证
         assertEquals("test_client",registeredClientPo.getClientId());
         assertEquals("password,client_credentials",registeredClientPo.getAuthorizationGrantTypes());
         assertEquals("read,write",registeredClientPo.getScopes());
-        assertEquals("read,write",registeredClientPo.getClientSecret());
+        assertEquals("test",registeredClientPo.getClientAuthenticationMethods());
+        assertEquals("http://localhost:8080", registeredClientPo.getRedirectUris());
+        assertEquals("abc123",registeredClientPo.getClientSecret());
+    }
+
+    @Test
+    void testPoNullSets() {
+        RegisteredClientForm registeredClientForm = new RegisteredClientForm();
+        registeredClientForm.setClientId("test_client");
+        registeredClientForm.setClientSecret("abc123");
+        registeredClientForm.setClientSecretExpires(7200L);
+        registeredClientForm.setAccessTokenTimeToLive(7200L);
+        registeredClientForm.setGrantTypes(Sets.newSet("password","client_credentials"));
+        registeredClientForm.setScopes(Sets.newSet("read"));
+        registeredClientForm.setRedirectUri("http://localhost:8080");
+        //执行
+        RegisteredClientPo registeredClientPo = registeredClientForm.toPo(RegisteredClientPo.class);
+        //验证
+        assertEquals("test_client",registeredClientPo.getClientId());
+        assertEquals("password,client_credentials",registeredClientPo.getAuthorizationGrantTypes());
+        assertEquals("read", registeredClientPo.getScopes());
+        assertEquals("http://localhost:8080", registeredClientPo.getRedirectUris());
+        assertNull(registeredClientPo.getClientAuthenticationMethods());
+        assertEquals("abc123",registeredClientPo.getClientSecret());
     }
 }
