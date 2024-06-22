@@ -17,15 +17,15 @@ public class GlobalExceptionHandlerAdvice {
 
     @ExceptionHandler(value = {InternalAuthenticationServiceException.class})
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public Result internalAuthenticationServiceException(InternalAuthenticationServiceException ex) {
-        log.error("load user by username exception:{}", ex.getMessage());
+    public Result<?> internalAuthenticationServiceException(InternalAuthenticationServiceException ex) {
+        log.error("Authentication Exception:{}", ex.getMessage());
         return Result.fail(AuthErrorType.UNAUTHORIZED_CLIENT);
     }
 
     @ExceptionHandler(value = {OAuth2AuthenticationException.class})
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public Result internalAuthenticationServiceException(OAuth2AuthenticationException ex) {
-        log.error("load user by username exception:{}", ex.getMessage());
+    public Result<?> internalAuthenticationServiceException(OAuth2AuthenticationException ex) {
+        log.error("On Authentication Failure :{}", ex.getMessage());
         return Result.fail(AuthErrorType.INVALID_CLIENT);
     }
 }

@@ -1,14 +1,13 @@
 package io.github.opensabre.authorization.config;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import io.github.opensabre.authorization.oauth2.Oauth2RegisteredClientRepository;
 import io.github.opensabre.authorization.oauth2.handler.Oauth2AccessDeniedHandler;
 import io.github.opensabre.authorization.oauth2.handler.Oauth2FailureHandler;
-import io.github.opensabre.authorization.oauth2.Oauth2RegisteredClientRepository;
 import io.github.opensabre.authorization.oauth2.handler.Oauth2SuccessHandler;
 import io.github.opensabre.authorization.service.IUserService;
 import jakarta.annotation.Resource;
@@ -52,9 +51,15 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static cn.hutool.core.bean.BeanUtil.beanToMap;
+
 @Slf4j
 @Configuration
 public class AuthorizationServerConfig {
+
+    private static final String CUSTOM_CONSENT_PAGE_URI = "/oauth2/consent";
+    private static final String LOGIN_FORM_URL = "/login";
+    private static final String VERIFICATION_URI = "/activate";
 
     @Resource
     JdbcTemplate jdbcTemplate;
@@ -81,14 +86,15 @@ public class AuthorizationServerConfig {
         Function<OidcUserInfoAuthenticationContext, OidcUserInfo> userInfoMapper = (context) -> {
             OidcUserInfoAuthenticationToken authentication = context.getAuthentication();
             JwtAuthenticationToken principal = (JwtAuthenticationToken) authentication.getPrincipal();
-            return new OidcUserInfo(BeanUtil.beanToMap(userService.getByUniqueId(principal.getName())));
+            return new OidcUserInfo(beanToMap(userService.getByUniqueId(principal.getName())));
         };
+        Oauth2FailureHandler errorResponseHandler = new Oauth2FailureHandler();
         httpSecurity
                 .getConfigurer(OAuth2AuthorizationServerConfigurer.class)
                 // 设置客户端授权中失败的handler处理
-                .clientAuthentication((auth) -> auth.errorResponseHandler(new Oauth2FailureHandler()))
+                .clientAuthentication((auth) -> auth.errorResponseHandler(errorResponseHandler))
                 // token 相关配置 如:/oauth2/token接口
-                .tokenEndpoint((token) -> token.errorResponseHandler(new Oauth2FailureHandler()))
+                .tokenEndpoint((token) -> token.errorResponseHandler(errorResponseHandler))
                 // Enable OpenID Connect 1.0
                 .oidc((oidc) -> {
                     // /userinfo返回自定义用户信息
@@ -97,13 +103,17 @@ public class AuthorizationServerConfig {
                                 userInfo.userInfoResponseHandler(new Oauth2SuccessHandler());
                             }
                     );
-                });
+                })
+                // 设置自定义用户确认授权页
+                .authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint.consentPage(CUSTOM_CONSENT_PAGE_URI))
+                // 设置设备码用户验证url(自定义用户验证页)
+                .deviceAuthorizationEndpoint(deviceAuthorizationEndpoint -> deviceAuthorizationEndpoint.verificationUri(VERIFICATION_URI));
         // 未通过身份验证异常时重定向到登录页面授权端点
         httpSecurity.exceptionHandling((exceptions) -> exceptions.defaultAuthenticationEntryPointFor(
-                new LoginUrlAuthenticationEntryPoint("/login"),
+                new LoginUrlAuthenticationEntryPoint(LOGIN_FORM_URL),
                 new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
         ));
-        //
+        // 处理使用access token访问用户信息端点和客户端注册端点
         httpSecurity.oauth2ResourceServer((resourceServer) -> resourceServer
                 .jwt(Customizer.withDefaults())
                 .accessDeniedHandler(new Oauth2AccessDeniedHandler())
@@ -155,7 +165,7 @@ public class AuthorizationServerConfig {
                     .map(c -> c.replaceFirst("^ROLE_", ""))
                     .collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
             claims.claim("roles", roles);
-            log.info("context:{}", context);
+            log.info("context:{}", context.getPrincipal().toString());
         };
     }
 

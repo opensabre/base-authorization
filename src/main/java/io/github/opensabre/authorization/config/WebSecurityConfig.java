@@ -47,6 +47,9 @@ public class WebSecurityConfig {
         httpSecurity
                 .formLogin(formLogin -> formLogin.loginPage("/login"))
                 .userDetailsService(userDetailsService);
+        // 添加BearerTokenAuthenticationFilter，将认证服务当做一个资源服务，解析请求头中的token
+        httpSecurity.oauth2ResourceServer((resourceServer) -> resourceServer
+                .jwt(Customizer.withDefaults()));
         return httpSecurity.build();
     }
 }

@@ -17,7 +17,7 @@ public class AuthenticationEvents {
 
     @EventListener
     public void onFailure(AbstractAuthenticationFailureEvent failureDisabledEvent) {
-        log.error("{} 认证失败，失败原因：{}",
+        log.warn("{} 认证失败，失败原因：{}",
                 failureDisabledEvent.getAuthentication().getName(),
                 failureDisabledEvent.getException().getMessage());
     }

@@ -34,7 +34,6 @@ public class RegisteredClientPo extends BasePo<RegisteredClientVo> {
     private String clientAuthenticationMethods;
     private String authorizationGrantTypes;
     private String redirectUris;
-    @TableField(typeHandler = JacksonTypeHandler.class)
     private String scopes;
     @TableField(typeHandler = JacksonTypeHandler.class)
     private Map<String, Object> clientSettings;
