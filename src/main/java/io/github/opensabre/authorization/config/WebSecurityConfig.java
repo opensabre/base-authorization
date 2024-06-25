@@ -41,7 +41,7 @@ public class WebSecurityConfig {
                 authorizeHttpRequests
                         .requestMatchers("/doc.html", "/v3/**", "/webjars/**", "/assets/**", "/login")
                         .permitAll()
-                        .requestMatchers("/client", "/client/**")
+                        .requestMatchers("/client**", "/oauth2/activate*", "/oauth2/consent", "/")
                         .authenticated());
         // 表单登录处理从授权服务器过滤器链
         httpSecurity

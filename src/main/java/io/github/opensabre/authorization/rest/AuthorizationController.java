@@ -1,5 +1,6 @@
 package io.github.opensabre.authorization.rest;
 
+import cn.hutool.core.util.StrUtil;
 import io.github.opensabre.authorization.entity.ScopeWithDescription;
 import jakarta.annotation.Resource;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
@@ -59,15 +60,18 @@ public class AuthorizationController {
                           @RequestParam(OAuth2ParameterNames.SCOPE) String scope,
                           @RequestParam(OAuth2ParameterNames.STATE) String state,
                           @RequestParam(name = OAuth2ParameterNames.USER_CODE, required = false) String userCode) {
-        // Remove scopes that were already approved
+        // Remove scopes that were already approved，需要授权的scope
         Set<String> scopesToApprove = new HashSet<>();
+        // 已授权的scope
         Set<String> previouslyApprovedScopes = new HashSet<>();
         // 查询client信息
         RegisteredClient registeredClient = this.registeredClientRepository.findByClientId(clientId);
         Assert.notNull(registeredClient, clientId + ":客户端不存在");
-        // 查询client授权的scope
+        // 查询client授权的scope信息
         OAuth2AuthorizationConsent currentAuthorizationConsent = this.authorizationConsentService.findById(registeredClient.getId(), principal.getName());
+        // 已授予的scope
         Set<String> authorizedScopes = Objects.isNull(currentAuthorizationConsent) ? Collections.emptySet() : currentAuthorizationConsent.getScopes();
+        //
         for (String requestedScope : StringUtils.delimitedListToStringArray(scope, " ")) {
             if (OidcScopes.OPENID.equals(requestedScope)) {
                 continue;
@@ -78,7 +82,6 @@ public class AuthorizationController {
                 scopesToApprove.add(requestedScope);
             }
         }
-
         model.addAttribute("clientId", clientId);
         model.addAttribute("state", state);
         model.addAttribute("scopes", withDescription(scopesToApprove));
@@ -97,10 +100,7 @@ public class AuthorizationController {
      */
     @GetMapping("/oauth2/activate")
     public String activate(@RequestParam(value = "user_code", required = false) String userCode) {
-        if (userCode != null) {
-            return "redirect:/oauth2/device_verification?user_code=" + userCode;
-        }
-        return "device-activate";
+        return StrUtil.isNotBlank(userCode) ? "redirect:/oauth2/device_verification?user_code=" + userCode : "device-activate";
     }
 
     /**
@@ -108,7 +108,7 @@ public class AuthorizationController {
      *
      * @return 验证成功页面
      */
-    @GetMapping("/oauth2/activated")
+    @GetMapping(value = "/oauth2/activated", params = "success")
     public String activated() {
         return "device-activated";
     }
