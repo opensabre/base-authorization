@@ -8,6 +8,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 import io.github.opensabre.authorization.oauth2.Oauth2RegisteredClientRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -37,10 +38,13 @@ import java.util.stream.Collectors;
 public class AuthorizationServiceConfig {
 
     @Resource
-    JdbcTemplate jdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
 
     @Resource
-    Oauth2RegisteredClientRepository oauth2RegisteredClientRepository;
+    private Oauth2RegisteredClientRepository oauth2RegisteredClientRepository;
+
+    @Value("${opensabre.oauth2.issuer-uri:localhost:8000}")
+    private String issuerUri;
 
     /**
      * 用于jwt解码
@@ -86,6 +90,7 @@ public class AuthorizationServiceConfig {
                     .map(c -> c.replaceFirst("^ROLE_", ""))
                     .collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
             claims.claim("roles", roles);
+            claims.issuer(issuerUri);
             log.info("context:{}", context.getPrincipal().toString());
         };
     }

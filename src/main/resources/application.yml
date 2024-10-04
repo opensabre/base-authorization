@@ -15,6 +15,10 @@ spring:
       max-lifetime: 1800000
       maximum-pool-size: 20
 
+opensabre:
+  oauth2:
+    issuer-uri: http://www.opensabre.io:8000
+
 management:
   endpoints:
     web:
