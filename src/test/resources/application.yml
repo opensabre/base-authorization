@@ -19,11 +19,6 @@ logging:
     java.sql.PreparedStatement: info
     java.sql.Statement: info
     Java.sql.Connection: info
-  file:
-    path: logs/
-  logback:
-    rollingpolicy:
-      max-file-size: 1GB
 
 mybatis-plus:
   configuration:
