@@ -38,6 +38,10 @@
             <artifactId>opensabre-starter-rpc</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.github.opensabre</groupId>
+            <artifactId>opensabre-starter-cache</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
