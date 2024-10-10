@@ -1,11 +1,11 @@
 package io.github.opensabre.authorization.config;
 
+import io.github.opensabre.authorization.entity.User;
 import io.github.opensabre.authorization.oauth2.device.DeviceClientAuthenticationConverter;
 import io.github.opensabre.authorization.oauth2.device.DeviceClientAuthenticationProvider;
 import io.github.opensabre.authorization.oauth2.handler.Oauth2AccessDeniedHandler;
 import io.github.opensabre.authorization.oauth2.handler.Oauth2DeviceSuccessHandler;
 import io.github.opensabre.authorization.oauth2.handler.Oauth2FailureHandler;
-import io.github.opensabre.authorization.oauth2.handler.Oauth2SuccessHandler;
 import io.github.opensabre.authorization.service.IUserService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +29,6 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
 import java.util.function.Function;
-
-import static cn.hutool.core.bean.BeanUtil.beanToMap;
 
 @Slf4j
 @Configuration
@@ -61,7 +59,10 @@ public class AuthorizationServerConfig {
         Function<OidcUserInfoAuthenticationContext, OidcUserInfo> userInfoMapper = (context) -> {
             OidcUserInfoAuthenticationToken authentication = context.getAuthentication();
             JwtAuthenticationToken principal = (JwtAuthenticationToken) authentication.getPrincipal();
-            return new OidcUserInfo(beanToMap(userService.getByUniqueId(principal.getName())));
+            User user = userService.getByUniqueId(principal.getName());
+            return OidcUserInfo.builder()
+                    .subject(user.getUsername())
+                    .name(user.getName()).build();
         };
         Oauth2FailureHandler errorResponseHandler = new Oauth2FailureHandler();
         // 新建设备码converter和provider
@@ -80,7 +81,7 @@ public class AuthorizationServerConfig {
                     // userinfo返回自定义用户信息
                     oidc.userInfoEndpoint((userInfo) -> {
                                 userInfo.userInfoMapper(userInfoMapper);
-                                userInfo.userInfoResponseHandler(new Oauth2SuccessHandler());
+//                                userInfo.userInfoResponseHandler(new Oauth2SuccessHandler());
                             }
                     );
                 })
