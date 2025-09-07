@@ -9,6 +9,9 @@ logs/
 .settings
 .springBeans
 
+.DS_Store
+pom-xml-flattened
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
