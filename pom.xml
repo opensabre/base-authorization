@@ -115,7 +115,7 @@
                         <ports>
                             <port>8000</port>
                         </ports>
-                        <jvmFlag>-XX:+UseContainerSupport</jvmFlag>
+                        <jvmFlags>-XX:+UseContainerSupport</jvmFlags>
                         <user>1000</user>
                         <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
                     </container>
