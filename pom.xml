@@ -95,11 +95,6 @@
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
             </plugin>
-            <!--docker镜像构建-->
-            <plugin>
-                <groupId>com.spotify</groupId>
-                <artifactId>dockerfile-maven-plugin</artifactId>
-            </plugin>
             <!-- Jib Maven插件 -->
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
