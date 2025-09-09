@@ -17,7 +17,7 @@ spring:
 
 opensabre:
   oauth2:
-    issuer-uri: http://www.opensabre.io:8000
+    issuer-uri: http://www.opensabre.cloud:8000
 
 management:
   endpoints:
