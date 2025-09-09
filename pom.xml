@@ -111,12 +111,13 @@
                     </to>
                     <!-- 容器配置 -->
                     <container>
+                        <user>1000</user>
+                        <workingDirectory>/app</workingDirectory>
                         <mainClass>io.github.opensabre.authorization.Oauth2AuthorizationApplication</mainClass>
                         <ports>
                             <port>8000</port>
                         </ports>
                         <jvmFlags>-XX:+UseContainerSupport</jvmFlags>
-                        <user>1000</user>
                         <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
                     </container>
                 </configuration>
