@@ -14,7 +14,7 @@
     <parent>
         <artifactId>opensabre-base-dependencies</artifactId>
         <groupId>io.github.opensabre</groupId>
-        <version>0.1.0</version>
+        <version>0.1.1</version>
     </parent>
 
     <properties>
@@ -36,6 +36,11 @@
         <dependency>
             <groupId>io.github.opensabre</groupId>
             <artifactId>opensabre-starter-rpc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>5.4.1</version>
         </dependency>
         <dependency>
             <groupId>io.github.opensabre</groupId>
@@ -99,26 +104,52 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>3.4.6</version>
+                <dependencies>
+                    <!-- 添加所有权扩展 -->
+                    <dependency>
+                        <groupId>com.google.cloud.tools</groupId>
+                        <artifactId>jib-ownership-extension-maven</artifactId>
+                        <version>0.1.0</version>
+                    </dependency>
+                </dependencies>
                 <configuration>
+                    <pluginExtensions>
+                        <pluginExtension>
+                            <implementation>com.google.cloud.tools.jib.maven.extension.ownership.JibOwnershipExtension</implementation>
+                            <configuration implementation="com.google.cloud.tools.jib.maven.extension.ownership.Configuration">
+                                <rules>
+                                    <rule>
+                                        <glob>/app/logs/**</glob>
+                                        <ownership>1001</ownership>
+                                    </rule>
+                                </rules>
+                            </configuration>
+                        </pluginExtension>
+                    </pluginExtensions>
                     <!-- 基础镜像 -->
                     <from>
                         <image>docker.1ms.run/eclipse-temurin:21-jre-alpine</image>
                     </from>
-                    <!-- 目标镜像 -->
                     <to>
-                        <image>opensabre/${project.artifactId}:${project.version}</image>
+                        <image>${REGISTRY_URL}/${project.artifactId}:${project.version}</image>
+                        <auth>
+                            <username>${secret.id}</username>
+                            <password>${secret.key}</password>
+                        </auth>
+                        <tags>
+                            <tag>latest</tag>
+                            <tag>${project.version}</tag>
+                        </tags>
                     </to>
-                    <!-- 容器配置 -->
                     <container>
-                        <user>1000</user>
-                        <workingDirectory>/app</workingDirectory>
-                        <mainClass>io.github.opensabre.authorization.Oauth2AuthorizationApplication</mainClass>
-                        <ports>
-                            <port>8000</port>
-                        </ports>
-                        <jvmFlags>-XX:+UseContainerSupport</jvmFlags>
-                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+                        <volumes>
+                            <volume>/app/logs</volume>
+                        </volumes>
+                        <!-- 设置环境变量 -->
+                        <environment>
+                            <!-- 设置时区 -->
+                            <TZ>Asia/Shanghai</TZ>
+                        </environment>
                     </container>
                 </configuration>
             </plugin>
