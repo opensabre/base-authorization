@@ -128,7 +128,7 @@
                     </pluginExtensions>
                     <!-- 基础镜像 -->
                     <from>
-                        <image>docker.1ms.run/eclipse-temurin:21-jre-alpine</image>
+                        <image>eclipse-temurin:21-jre-alpine</image>
                     </from>
                     <to>
                         <image>${REGISTRY_URL}/${project.artifactId}:${project.version}</image>
