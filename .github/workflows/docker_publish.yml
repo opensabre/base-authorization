@@ -24,4 +24,4 @@ jobs:
           distribution: 'temurin'
 
       - name: Build and Push with Jib
-        run: mvn compile jib:build -Dsecret.id=${{ secrets.TENCENT_CLOUD_SECRET_ID }} -Dsecret.key=${{ secrets.TENCENT_CLOUD_SECRET_KEY }}
+        run: mvn compile jib:build -Dsecret.id=${{ secrets.DOCKER_CLOUD_SECRET_ID }} -Dsecret.key=${{ secrets.DOCKER_CLOUD_SECRET_KEY }}
