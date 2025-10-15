@@ -1,0 +1,27 @@
+name: Build and Push with Jib
+
+on:
+  push:
+    branches: [ master ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY_URL: 'ccr.ccs.tencentyun.com/opensabre' # 替换为你的镜像提交地址
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21' # 或你项目使用的JDK版本
+          distribution: 'temurin'
+
+      - name: Build and Push with Jib
+        run: mvn compile jib:build -Dsecret.id=${{ secrets.TENCENT_CLOUD_SECRET_ID }} -Dsecret.key=${{ secrets.TENCENT_CLOUD_SECRET_KEY }}
