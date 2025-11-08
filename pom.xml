@@ -14,7 +14,7 @@
     <parent>
         <artifactId>opensabre-base-dependencies</artifactId>
         <groupId>io.github.opensabre</groupId>
-        <version>0.1.1</version>
+        <version>0.2.0</version>
     </parent>
 
     <properties>
@@ -104,54 +104,6 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <dependencies>
-                    <!-- 添加所有权扩展 -->
-                    <dependency>
-                        <groupId>com.google.cloud.tools</groupId>
-                        <artifactId>jib-ownership-extension-maven</artifactId>
-                        <version>0.1.0</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <pluginExtensions>
-                        <pluginExtension>
-                            <implementation>com.google.cloud.tools.jib.maven.extension.ownership.JibOwnershipExtension</implementation>
-                            <configuration implementation="com.google.cloud.tools.jib.maven.extension.ownership.Configuration">
-                                <rules>
-                                    <rule>
-                                        <glob>/app/logs/**</glob>
-                                        <ownership>1001</ownership>
-                                    </rule>
-                                </rules>
-                            </configuration>
-                        </pluginExtension>
-                    </pluginExtensions>
-                    <!-- 基础镜像 -->
-                    <from>
-                        <image>eclipse-temurin:21-jre-alpine</image>
-                    </from>
-                    <to>
-                        <image>${REGISTRY_URL}/${project.artifactId}:${project.version}</image>
-                        <auth>
-                            <username>${secret.id}</username>
-                            <password>${secret.key}</password>
-                        </auth>
-                        <tags>
-                            <tag>latest</tag>
-                            <tag>${project.version}</tag>
-                        </tags>
-                    </to>
-                    <container>
-                        <volumes>
-                            <volume>/app/logs</volume>
-                        </volumes>
-                        <!-- 设置环境变量 -->
-                        <environment>
-                            <!-- 设置时区 -->
-                            <TZ>Asia/Shanghai</TZ>
-                        </environment>
-                    </container>
-                </configuration>
             </plugin>
         </plugins>
     </build>
