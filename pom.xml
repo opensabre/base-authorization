@@ -104,6 +104,21 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
+                <configuration>
+                    <pluginExtensions>
+                        <pluginExtension>
+                            <implementation>com.google.cloud.tools.jib.maven.extension.ownership.JibOwnershipExtension</implementation>
+                            <configuration implementation="com.google.cloud.tools.jib.maven.extension.ownership.Configuration">
+                                <rules>
+                                    <rule>
+                                        <glob>/app/logs</glob>
+                                        <ownership>1001</ownership>
+                                    </rule>
+                                </rules>
+                            </configuration>
+                        </pluginExtension>
+                    </pluginExtensions>
+                </configuration>
             </plugin>
         </plugins>
     </build>
