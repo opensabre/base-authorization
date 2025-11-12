@@ -111,7 +111,7 @@
                             <configuration implementation="com.google.cloud.tools.jib.maven.extension.ownership.Configuration">
                                 <rules>
                                     <rule>
-                                        <glob>/app/logs</glob>
+                                        <glob>/app/**</glob>
                                         <ownership>1001</ownership>
                                     </rule>
                                 </rules>
