@@ -14,11 +14,15 @@ import org.springframework.security.oauth2.server.authorization.settings.OAuth2T
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.springframework.security.oauth2.server.authorization.settings.ConfigurationSettingNames.Token.*;
 
 @Component
 public class RegisteredClientConvert {
@@ -44,6 +48,7 @@ public class RegisteredClientConvert {
         Set<ClientAuthenticationMethod> methods = Arrays.stream(StringUtils.split(registeredClientPo.getClientAuthenticationMethods(), ","))
                 .map(ClientAuthenticationMethod::new)
                 .collect(Collectors.toSet());
+        Map<String, Object> tokenSettings = registeredClientPo.getTokenSettings();
         // 构建 RegisteredClient对象
         RegisteredClient.Builder registeredClientBuilder = RegisteredClient.withId(registeredClientPo.getId())
                 .clientId(registeredClientPo.getClientId())
@@ -54,16 +59,18 @@ public class RegisteredClientConvert {
                 .clientAuthenticationMethods(methodSet -> methodSet.addAll(methods))
                 .scopes(scopeSet -> scopeSet.addAll(scopes))
                 .authorizationGrantTypes(grantType -> grantType.addAll(grantTypes))
+                // Client相关设置
                 .clientSettings(ClientSettings.withSettings(registeredClientPo.getClientSettings()).build())
+                // Token相关设置
                 .tokenSettings(TokenSettings.builder()
                                 // token有效期5小时
-//                        .accessTokenTimeToLive(registeredClientPo.getTokenSettings().getAccessTokenTimeToLive())
+                        .accessTokenTimeToLive(Duration.ofSeconds(((Double)tokenSettings.get(ACCESS_TOKEN_TIME_TO_LIVE)).longValue()))
                                 // 使用默认JWT相关格式
                                 .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
                                 // 开启刷新token
-                                .reuseRefreshTokens(true)
+                                .reuseRefreshTokens((Boolean)tokenSettings.get(REUSE_REFRESH_TOKENS))
                                 // refreshToken有效期120分钟
-//                        .refreshTokenTimeToLive(registeredClientPo.getTokenSettings().getRefreshTokenTimeToLive())
+                        .refreshTokenTimeToLive(Duration.ofSeconds(((Double)tokenSettings.get(REFRESH_TOKEN_TIME_TO_LIVE)).longValue()))
                                 // idToken签名算法
                                 .idTokenSignatureAlgorithm(SignatureAlgorithm.RS256).build()
                 );
