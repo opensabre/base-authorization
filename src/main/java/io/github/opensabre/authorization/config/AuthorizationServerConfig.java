@@ -99,6 +99,7 @@ public class AuthorizationServerConfig {
                         clientAuthentication
                                 .authenticationConverter(deviceClientAuthenticationConverter)
                                 .authenticationProvider(deviceClientAuthenticationProvider)
+//                                .errorResponseHandler(errorResponseHandler)
                 );
         // 未通过身份验证异常时重定向到登录页面授权端点（通过浏览器访问时）
         httpSecurity.exceptionHandling((exceptions) -> exceptions.defaultAuthenticationEntryPointFor(

@@ -38,11 +38,6 @@
             <artifactId>opensabre-starter-rpc</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents.client5</groupId>
-            <artifactId>httpclient5</artifactId>
-            <version>5.4.1</version>
-        </dependency>
-        <dependency>
             <groupId>io.github.opensabre</groupId>
             <artifactId>opensabre-starter-cache</artifactId>
         </dependency>
@@ -104,21 +99,6 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <configuration>
-                    <pluginExtensions>
-                        <pluginExtension>
-                            <implementation>com.google.cloud.tools.jib.maven.extension.ownership.JibOwnershipExtension</implementation>
-                            <configuration implementation="com.google.cloud.tools.jib.maven.extension.ownership.Configuration">
-                                <rules>
-                                    <rule>
-                                        <glob>/app/**</glob>
-                                        <ownership>1001</ownership>
-                                    </rule>
-                                </rules>
-                            </configuration>
-                        </pluginExtension>
-                    </pluginExtensions>
-                </configuration>
             </plugin>
         </plugins>
     </build>

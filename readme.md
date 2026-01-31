@@ -19,7 +19,7 @@
 
 启动应用：`mvn spring-boot:run`
 
-docker镜像打包：`mvn docker:build`
+docker镜像打包：`mvn jib:build`
 
 应用地址：`http://localhost:8000`
 
@@ -58,39 +58,6 @@ password: `password`
 ```
 
 ### 接口测试
-
-#### 密码模式，grant_type=password
-
-用途：可用于用户通过前端应用登陆、使用应用，如app，web等终端
-
-![postman](../../docs/auth/oauth2_password_token_auth.png)
-
-![postman](../../docs/auth/oauth2_password_token.png)
-
-请求报文
-
-```
-POST /oauth2/token?scope=read&grant_type=password HTTP/1.1
-Host: localhost:8000
-Authorization: Basic dGVzdF9jbGllbnQ6dGVzdF9zZWNyZXQ=
-Cache-Control: no-cache
-Content-Type: application/x-www-form-urlencoded
-
-username=zhoutaoo&password=password
-```
-响应报文
-
-```
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ6aG91dGFvbyIsInNjb3BlIjpbInJlYWQiXSwib3JnYW5pemF0aW9uIjoiemhvdXRhb28iLCJleHAiOjE1MzE5NzM4MTgsImF1dGhvcml0aWVzIjpbIkFETUlOIiwiSVQiXSwianRpIjoiNTFiODY4ZDEtMGNlMS00ZmI4LTkwMWQtOWM3YmZmYzBhZGJiIiwiY2xpZW50X2lkIjoidGVzdF9jbGllbnQifQ.BlIryRbSL414rDv5EfzZSjpjvWybcX3hEJy3fV8l6Wo",
-  "token_type": "bearer",
-  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ6aG91dGFvbyIsInNjb3BlIjpbInJlYWQiXSwib3JnYW5pemF0aW9uIjoiemhvdXRhb28iLCJhdGkiOiI1MWI4NjhkMS0wY2UxLTRmYjgtOTAxZC05YzdiZmZjMGFkYmIiLCJleHAiOjE1MzQ1MjI2MTgsImF1dGhvcml0aWVzIjpbIkFETUlOIiwiSVQiXSwianRpIjoiMGU2N2Q5MDEtOThlMC00ZTk3LTkwNzgtODllMTBmZTRjOGI2IiwiY2xpZW50X2lkIjoidGVzdF9jbGllbnQifQ.zNtWWG8xxPsjTZKghOjyGNDjnhHqnPvikfqN1uynh3U",
-  "expires_in": 43199,
-  "scope": "read",
-  "organization": "zhoutaoo",
-  "jti": "51b868d1-0ce1-4fb8-901d-9c7bffc0adbb"
-}
-```
 
 #### 客户端模式，grant_type=client_credentials
 
@@ -267,14 +234,4 @@ public JwtAccessTokenConverter accessTokenConverter() {
    converter.setSigningKey(signingKey);
    return converter;
 }
-```
-
-* jwt对称密钥配置项
-
-```
-spring:
-  security:
-    oauth2:
-      jwt:
-        signingKey: 123456
 ```

@@ -76,6 +76,7 @@ public class AuthorizationServiceConfig {
 
     /**
      * 自定义JWT token内容
+     * 将用户角色放入token中
      *
      * @return token自定义
      */
