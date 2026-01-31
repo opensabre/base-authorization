@@ -18,6 +18,15 @@ spring:
 opensabre:
   oauth2:
     issuer-uri: http://www.opensabre.cloud:8000
+  rest:
+    swagger:
+      version: v0.0.1
+      title: Opensabre Authorization API
+      description: Opensabre Authorization REST API
+      licenseUrl: https://github.com/opensabre/base-authorization
+      licenseName: Apache 2.0
+      wikiUrl: https://opensabre.github.io/docs
+      wikiDocumentation: Opensabre Authorization Wiki Documentation
 
 management:
   endpoints:
