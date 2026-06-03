@@ -39,13 +39,15 @@ public class WebSecurityConfig {
         // url安全配置
         httpSecurity.authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
-                        .requestMatchers("/doc.html", "/v3/**", "/webjars/**", "/assets/**", "/login")
+                        .requestMatchers("/doc.html", "/v3/**", "/webjars/**", "/assets/**", "favicon.svg", "/login")
                         .permitAll()
-                        .requestMatchers("/client**", "/oauth2/activate*", "/oauth2/consent", "/")
+                        .requestMatchers("/client**", "/oauth2/activate*", "/oauth2/consent", "/", "/profile")
                         .authenticated());
         // 表单登录处理从授权服务器过滤器链
         httpSecurity
-                .formLogin(formLogin -> formLogin.loginPage("/login"))
+                .formLogin(formLogin -> formLogin
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/profile", false))
                 .userDetailsService(userDetailsService);
         // 添加BearerTokenAuthenticationFilter，将认证服务当做一个资源服务，解析请求头中的token
         httpSecurity.oauth2ResourceServer((resourceServer) -> resourceServer

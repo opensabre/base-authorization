@@ -1,42 +1,69 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Spring Authorization Server sample</title>
+    <title>OpenSabre 授权中心</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" th:href="@{/favicon.svg}">
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.7/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/signin.css" th:href="@{/assets/css/signin.css}" />
 </head>
 <body>
-<div class="container">
-    <form class="form-signin w-100 m-auto" method="post" th:action="@{/login}">
-        <div th:if="${param.error}" class="alert alert-danger" role="alert">
-            Invalid username or password.
+<main class="login-shell">
+    <section class="brand-panel" aria-label="OpenSabre 授权中心">
+        <img class="brand-mark" src="/favicon.svg" th:src="@{/favicon.svg}" alt="OpenSabre">
+        <p class="brand-eyebrow">OAuth2 Authorization Server</p>
+        <h1>OpenSabre 授权中心</h1>
+        <p class="brand-copy">统一管理应用授权、用户身份与开放接口访问，保护每一次登录和令牌签发。</p>
+        <div class="security-points" aria-label="安全能力">
+            <span>OAuth2</span>
+            <span>OIDC</span>
+            <span>Device Flow</span>
         </div>
-        <div th:if="${param.logout}" class="alert alert-success" role="alert">
-            You have been logged out.
-        </div>
-        <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
-        <div class="form-floating">
-            <input type="text" id="username" name="username" class="form-control" required autofocus>
-            <label for="username">Username</label>
-        </div>
-        <div class="form-floating">
-            <input type="password" id="password" name="password" class="form-control" required>
-            <label for="password">Password</label>
-        </div>
-        <div>
-            <button class="w-100 btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-            <a class="w-100 btn btn-light btn-block bg-white" href="/oauth2/authorization/google-idp" role="link" style="margin-top: 10px">
-                <img src="/assets/img/google.png" th:src="@{/assets/img/google.png}" width="20" style="margin-right: 5px;" alt="Sign in with Google">
-                Sign in with Google
-            </a>
-            <a class="w-100 btn btn-light btn-block bg-white" href="/oauth2/authorization/github-idp" role="link" style="margin-top: 10px">
-                <img src="/assets/img/github.png" th:src="@{/assets/img/github.png}" width="24" style="margin-right: 5px;" alt="Sign in with Github">
-                Sign in with Github
-            </a>
-        </div>
-    </form>
-</div>
+    </section>
+
+    <section class="signin-panel" aria-label="登录表单">
+        <form class="form-signin" method="post" th:action="@{/login}">
+            <div class="form-header">
+                <p class="form-eyebrow">欢迎回来</p>
+                <h2>登录账号</h2>
+                <p>继续访问授权服务与受保护资源。</p>
+            </div>
+
+            <div th:if="${param.error}" class="alert alert-danger" role="alert">
+                账号或密码错误，请重新输入。
+            </div>
+            <div th:if="${param.logout}" class="alert alert-success" role="alert">
+                你已安全退出。
+            </div>
+
+            <div class="form-fields">
+                <div class="form-floating">
+                    <input type="text" id="username" name="username" class="form-control" autocomplete="username" placeholder="用户名" required autofocus>
+                    <label for="username">用户名</label>
+                </div>
+                <div class="form-floating">
+                    <input type="password" id="password" name="password" class="form-control" autocomplete="current-password" placeholder="密码" required>
+                    <label for="password">密码</label>
+                </div>
+            </div>
+
+            <button class="btn btn-primary btn-signin" type="submit">登录</button>
+
+            <div class="divider"><span>或使用第三方账号</span></div>
+
+            <div class="social-actions">
+                <a class="btn btn-social" href="/oauth2/authorization/google-idp" role="link">
+                    <img src="/assets/img/google.png" th:src="@{/assets/img/google.png}" width="20" height="20" alt="">
+                    <span>Google 登录</span>
+                </a>
+                <a class="btn btn-social" href="/oauth2/authorization/github-idp" role="link">
+                    <img src="/assets/img/github.png" th:src="@{/assets/img/github.png}" width="22" height="22" alt="">
+                    <span>GitHub 登录</span>
+                </a>
+            </div>
+        </form>
+    </section>
+</main>
 </body>
 </html>

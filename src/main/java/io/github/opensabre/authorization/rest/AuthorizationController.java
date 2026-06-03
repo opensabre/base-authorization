@@ -2,7 +2,11 @@ package io.github.opensabre.authorization.rest;
 
 import cn.hutool.core.util.StrUtil;
 import io.github.opensabre.authorization.entity.ScopeWithDescription;
+import io.github.opensabre.authorization.entity.User;
+import io.github.opensabre.authorization.service.IUserService;
 import jakarta.annotation.Resource;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsent;
@@ -32,6 +36,9 @@ public class AuthorizationController {
     @Resource
     private OAuth2AuthorizationConsentService authorizationConsentService;
 
+    @Resource
+    private IUserService userService;
+
     /**
      * 登陆页面
      *
@@ -40,6 +47,28 @@ public class AuthorizationController {
     @GetMapping("/login")
     public String login() {
         return "login";
+    }
+
+    /**
+     * 用户个人主页
+     *
+     * @param principal 认证信息
+     * @param model     页面model
+     * @return 用户个人主页
+     */
+    @GetMapping({"/", "/profile"})
+    public String profile(Authentication principal, Model model) {
+        User user = userService.getByUniqueId(principal.getName());
+        String displayName = user != null && StrUtil.isNotBlank(user.getName()) ? user.getName() : principal.getName();
+        Set<String> authorities = principal.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet());
+        model.addAttribute("user", user);
+        model.addAttribute("principalName", principal.getName());
+        model.addAttribute("displayName", displayName);
+        model.addAttribute("avatarText", StrUtil.subPre(displayName, 1).toUpperCase());
+        model.addAttribute("authorities", authorities);
+        return "profile";
     }
 
     /**

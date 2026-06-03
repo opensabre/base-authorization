@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>个人主页 - OpenSabre 授权中心</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" th:href="@{/favicon.svg}">
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/profile.css" th:href="@{/assets/css/profile.css}" />
+</head>
+<body>
+<main class="profile-shell">
+    <header class="app-header" aria-label="页面导航">
+        <a class="brand-link" href="/" th:href="@{/}">
+            <img class="brand-mark" src="/favicon.svg" th:src="@{/favicon.svg}" alt="OpenSabre">
+            <span>OpenSabre 授权中心</span>
+        </a>
+        <div class="header-actions">
+            <a class="ant-btn ant-btn-default" href="/.well-known/openid-configuration">OIDC 配置</a>
+            <form method="post" th:action="@{/logout}">
+                <button class="ant-btn ant-btn-primary" type="submit">退出登录</button>
+            </form>
+        </div>
+    </header>
+
+    <section class="overview-grid" aria-label="用户概览">
+        <article class="ant-card profile-card">
+            <div class="profile-head">
+                <div class="avatar" th:text="${avatarText}">U</div>
+                <div class="profile-copy">
+                    <span class="ant-badge"
+                          th:classappend="${user == null || user.enabled == null || user.enabled} ? ' ant-badge-success' : ' ant-badge-error'"
+                          th:text="${user == null || user.enabled == null || user.enabled} ? '账号可用' : '账号禁用'">账号可用</span>
+                    <h1 th:text="${displayName}">OpenSabre User</h1>
+                    <p th:text="${user != null && user.username != null ? user.username : principalName}">username</p>
+                </div>
+            </div>
+            <div class="profile-meta">
+                <div>
+                    <span>手机号</span>
+                    <strong th:text="${user != null && user.mobile != null ? user.mobile : '-'}">-</strong>
+                </div>
+                <div>
+                    <span>登录标识</span>
+                    <strong th:text="${principalName}">username</strong>
+                </div>
+            </div>
+        </article>
+
+        <article class="ant-card status-card">
+            <div class="ant-card-head">
+                <h2>安全状态</h2>
+            </div>
+            <div class="status-list">
+                <div class="status-item">
+                    <span class="status-dot"
+                          th:classappend="${user == null || user.accountNonExpired == null || user.accountNonExpired} ? ' success' : ' danger'"></span>
+                    <div>
+                        <strong>账号有效</strong>
+                        <p th:text="${user == null || user.accountNonExpired == null || user.accountNonExpired} ? '未过期' : '已过期'">未过期</p>
+                    </div>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot"
+                          th:classappend="${user == null || user.credentialsNonExpired == null || user.credentialsNonExpired} ? ' success' : ' danger'"></span>
+                    <div>
+                        <strong>凭证有效</strong>
+                        <p th:text="${user == null || user.credentialsNonExpired == null || user.credentialsNonExpired} ? '未过期' : '已过期'">未过期</p>
+                    </div>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot"
+                          th:classappend="${user == null || user.accountNonLocked == null || user.accountNonLocked} ? ' success' : ' danger'"></span>
+                    <div>
+                        <strong>账号锁定</strong>
+                        <p th:text="${user == null || user.accountNonLocked == null || user.accountNonLocked} ? '未锁定' : '已锁定'">未锁定</p>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <section class="dashboard-grid" aria-label="用户信息">
+        <article class="ant-card account-card">
+            <div class="ant-card-head">
+                <h2>账号资料</h2>
+                <span class="section-extra">Profile</span>
+            </div>
+            <dl class="ant-descriptions">
+                <div>
+                    <dt>姓名</dt>
+                    <dd th:text="${user != null && user.name != null ? user.name : '-'}">-</dd>
+                </div>
+                <div>
+                    <dt>用户名</dt>
+                    <dd th:text="${user != null && user.username != null ? user.username : principalName}">-</dd>
+                </div>
+                <div>
+                    <dt>手机号</dt>
+                    <dd th:text="${user != null && user.mobile != null ? user.mobile : '-'}">-</dd>
+                </div>
+                <div>
+                    <dt>账号状态</dt>
+                    <dd>
+                        <span class="ant-tag"
+                              th:classappend="${user == null || user.enabled == null || user.enabled} ? ' ant-tag-success' : ' ant-tag-error'"
+                              th:text="${user == null || user.enabled == null || user.enabled} ? '可用' : '已禁用'">可用</span>
+                    </dd>
+                </div>
+            </dl>
+        </article>
+
+        <article class="ant-card actions-card">
+            <div class="ant-card-head">
+                <h2>快捷入口</h2>
+            </div>
+            <div class="quick-actions">
+                <a href="/oauth2/activate" th:href="@{/oauth2/activate}">
+                    <span class="action-icon">D</span>
+                    <span>设备激活</span>
+                </a>
+                <a href="/.well-known/oauth-authorization-server">
+                    <span class="action-icon">A</span>
+                    <span>授权元数据</span>
+                </a>
+            </div>
+        </article>
+
+        <article class="ant-card roles-card">
+            <div class="ant-card-head">
+                <h2>权限角色</h2>
+                <span class="section-extra" th:text="${(authorities != null ? authorities.size() : 0) + ' 项'}">0 项</span>
+            </div>
+            <div class="role-list" th:if="${authorities != null && !authorities.isEmpty()}">
+                <span class="ant-tag ant-tag-processing" th:each="authority : ${authorities}" th:text="${authority}">ROLE_USER</span>
+            </div>
+            <div class="empty-state" th:if="${authorities == null || authorities.isEmpty()}">
+                <span>暂无权限信息</span>
+            </div>
+        </article>
+    </section>
+</main>
+</body>
+</html>
