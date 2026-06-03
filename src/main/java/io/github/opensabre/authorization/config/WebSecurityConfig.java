@@ -39,7 +39,7 @@ public class WebSecurityConfig {
         // url安全配置
         httpSecurity.authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
-                        .requestMatchers("/doc.html", "/v3/**", "/webjars/**", "/assets/**", "favicon.svg", "/login")
+                        .requestMatchers("/doc.html", "/v3/**", "/webjars/**", "/assets/**", "/favicon.svg", "/login")
                         .permitAll()
                         .requestMatchers("/client**", "/oauth2/activate*", "/oauth2/consent", "/", "/profile")
                         .authenticated());
