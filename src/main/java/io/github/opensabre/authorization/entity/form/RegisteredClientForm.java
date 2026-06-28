@@ -62,7 +62,7 @@ public class RegisteredClientForm extends BaseForm<RegisteredClientPo> {
         registeredClientPo.setScopes(getJoinStr(this.scopes));
         registeredClientPo.setAuthorizationGrantTypes(getJoinStr(this.grantTypes));
         registeredClientPo.setClientAuthenticationMethods(getJoinStr(this.clientAuthenticationMethods));
-        registeredClientPo.setRedirectUris(String.join(",", this.redirectUri));
+        registeredClientPo.setRedirectUris(this.redirectUri);
         return registeredClientPo;
     }
 

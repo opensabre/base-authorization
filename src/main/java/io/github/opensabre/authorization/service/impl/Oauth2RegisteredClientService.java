@@ -43,6 +43,10 @@ public class Oauth2RegisteredClientService extends ServiceImpl<RegisteredClientM
     @Override
     @CacheInvalidate(name = CACHE_PREFIX_KEY, key = "#registeredClientPo.id")
     public boolean update(RegisteredClientPo registeredClientPo) {
+        RegisteredClientPo current = this.getById(registeredClientPo.getId());
+        if (current != null && StringUtils.isBlank(registeredClientPo.getClientSecret())) {
+            registeredClientPo.setClientSecret(current.getClientSecret());
+        }
         //密码不为空，表示重新设置了密码，保存密码
         if (StringUtils.isNotBlank(registeredClientPo.getClientSecret()))
             registeredClientPo.setClientSecret(passwordEncoder.encode(registeredClientPo.getClientSecret()));

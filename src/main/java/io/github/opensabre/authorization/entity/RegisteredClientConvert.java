@@ -35,17 +35,23 @@ public class RegisteredClientConvert {
      */
     public RegisteredClient convertToRegisteredClient(RegisteredClientPo registeredClientPo) {
         // 构建scope
-        Set<String> scopes = Arrays.stream(StringUtils.split(registeredClientPo.getScopes(), ","))
-                .collect(Collectors.toSet());
+        Set<String> scopes = StringUtils.isBlank(registeredClientPo.getScopes())
+                ? Set.of()
+                : Arrays.stream(StringUtils.split(registeredClientPo.getScopes(), ",")).collect(Collectors.toSet());
         // 构建scope
-        Set<String> redirectUris = Arrays.stream(StringUtils.split(registeredClientPo.getRedirectUris(), ","))
-                .collect(Collectors.toSet());
+        Set<String> redirectUris = StringUtils.isBlank(registeredClientPo.getRedirectUris())
+                ? Set.of()
+                : Arrays.stream(StringUtils.split(registeredClientPo.getRedirectUris(), ",")).collect(Collectors.toSet());
         // 构建gantType
-        Set<AuthorizationGrantType> grantTypes = Arrays.stream(StringUtils.split(registeredClientPo.getAuthorizationGrantTypes(), ","))
+        Set<AuthorizationGrantType> grantTypes = StringUtils.isBlank(registeredClientPo.getAuthorizationGrantTypes())
+                ? Set.of()
+                : Arrays.stream(StringUtils.split(registeredClientPo.getAuthorizationGrantTypes(), ","))
                 .map(AuthorizationGrantType::new)
                 .collect(Collectors.toSet());
         // 构建method
-        Set<ClientAuthenticationMethod> methods = Arrays.stream(StringUtils.split(registeredClientPo.getClientAuthenticationMethods(), ","))
+        Set<ClientAuthenticationMethod> methods = StringUtils.isBlank(registeredClientPo.getClientAuthenticationMethods())
+                ? Set.of()
+                : Arrays.stream(StringUtils.split(registeredClientPo.getClientAuthenticationMethods(), ","))
                 .map(ClientAuthenticationMethod::new)
                 .collect(Collectors.toSet());
         Map<String, Object> tokenSettings = registeredClientPo.getTokenSettings();
@@ -54,26 +60,30 @@ public class RegisteredClientConvert {
                 .clientId(registeredClientPo.getClientId())
                 .clientSecret(registeredClientPo.getClientSecret())
                 .clientName(registeredClientPo.getClientName())
-                .clientSecretExpiresAt(registeredClientPo.getClientSecretExpiresAt().toInstant())
+                .clientSecretExpiresAt(registeredClientPo.getClientSecretExpiresAt() == null ? null : registeredClientPo.getClientSecretExpiresAt().toInstant())
                 .redirectUris(uris -> uris.addAll(redirectUris))
                 .clientAuthenticationMethods(methodSet -> methodSet.addAll(methods))
                 .scopes(scopeSet -> scopeSet.addAll(scopes))
                 .authorizationGrantTypes(grantType -> grantType.addAll(grantTypes))
-                // Client相关设置
-                .clientSettings(ClientSettings.withSettings(registeredClientPo.getClientSettings()).build())
-                // Token相关设置
-                .tokenSettings(TokenSettings.builder()
-                                // token有效期5小时
-                        .accessTokenTimeToLive(Duration.ofSeconds(((Double)tokenSettings.get(ACCESS_TOKEN_TIME_TO_LIVE)).longValue()))
-                                // 使用默认JWT相关格式
-                                .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
-                                // 开启刷新token
-                                .reuseRefreshTokens((Boolean)tokenSettings.get(REUSE_REFRESH_TOKENS))
-                                // refreshToken有效期120分钟
-                        .refreshTokenTimeToLive(Duration.ofSeconds(((Double)tokenSettings.get(REFRESH_TOKEN_TIME_TO_LIVE)).longValue()))
-                                // idToken签名算法
-                                .idTokenSignatureAlgorithm(SignatureAlgorithm.RS256).build()
-                );
+                .clientSettings(ClientSettings.withSettings(registeredClientPo.getClientSettings()).build());
+        Object accessTokenTimeToLive = tokenSettings == null ? null : tokenSettings.get(ACCESS_TOKEN_TIME_TO_LIVE);
+        Object refreshTokenTimeToLive = tokenSettings == null ? null : tokenSettings.get(REFRESH_TOKEN_TIME_TO_LIVE);
+        Object reuseRefreshTokens = tokenSettings == null ? null : tokenSettings.get(REUSE_REFRESH_TOKENS);
+        TokenSettings.Builder tokenSettingsBuilder = TokenSettings.builder()
+                .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
+                .idTokenSignatureAlgorithm(SignatureAlgorithm.RS256);
+        if (accessTokenTimeToLive instanceof Number number) {
+            tokenSettingsBuilder.accessTokenTimeToLive(Duration.ofSeconds(number.longValue()));
+        } else {
+            tokenSettingsBuilder.accessTokenTimeToLive(Duration.ofSeconds(300));
+        }
+        if (refreshTokenTimeToLive instanceof Number number) {
+            tokenSettingsBuilder.refreshTokenTimeToLive(Duration.ofSeconds(number.longValue()));
+        } else {
+            tokenSettingsBuilder.refreshTokenTimeToLive(Duration.ofSeconds(3600));
+        }
+        tokenSettingsBuilder.reuseRefreshTokens(reuseRefreshTokens instanceof Boolean booleanValue ? booleanValue : true);
+        registeredClientBuilder.tokenSettings(tokenSettingsBuilder.build());
         return registeredClientBuilder.build();
     }
 
@@ -90,12 +100,22 @@ public class RegisteredClientConvert {
         registeredClientPo.setClientName(registeredClientForm.getClientName());
         registeredClientPo.setClientSecret(registeredClientForm.getClientSecret());
         registeredClientPo.setRedirectUris(registeredClientForm.getRedirectUri());
-        registeredClientPo.setClientSecretExpiresAt(Date.from(Instant.now().plusSeconds(registeredClientForm.getClientSecretExpires())));
+        if (registeredClientForm.getClientSecretExpires() != null) {
+            registeredClientPo.setClientSecretExpiresAt(Date.from(Instant.now().plusSeconds(registeredClientForm.getClientSecretExpires())));
+        }
         registeredClientPo.setAuthorizationGrantTypes(String.join(",", registeredClientForm.getGrantTypes()));
         registeredClientPo.setClientAuthenticationMethods(StringUtils.join(registeredClientForm.getClientAuthenticationMethods(), ","));
         registeredClientPo.setScopes(String.join(",", registeredClientForm.getScopes()));
         registeredClientPo.setClientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build().getSettings());
-        registeredClientPo.setTokenSettings(TokenSettings.builder().build().getSettings());
+        Long accessTokenTimeToLive = registeredClientForm.getAccessTokenTimeToLive() == null ? 300L : registeredClientForm.getAccessTokenTimeToLive();
+        Long refreshTokenTimeToLive = registeredClientForm.getRefreshTokenTimeToLive() == null ? 3600L : registeredClientForm.getRefreshTokenTimeToLive();
+        registeredClientPo.setTokenSettings(TokenSettings.builder()
+                .accessTokenTimeToLive(Duration.ofSeconds(accessTokenTimeToLive))
+                .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
+                .reuseRefreshTokens(true)
+                .refreshTokenTimeToLive(Duration.ofSeconds(refreshTokenTimeToLive))
+                .idTokenSignatureAlgorithm(SignatureAlgorithm.RS256)
+                .build().getSettings());
         return registeredClientPo;
     }
 
@@ -110,12 +130,28 @@ public class RegisteredClientConvert {
         registeredClientVo.setId(registeredClientPo.getId());
         registeredClientVo.setClientId(registeredClientPo.getClientId());
         registeredClientVo.setClientName(registeredClientPo.getClientName());
+        registeredClientVo.setClientSecret(registeredClientPo.getClientSecret());
         registeredClientVo.setClientIdIssuedAt(registeredClientPo.getClientIdIssuedAt());
         registeredClientVo.setClientSecretExpiresAt(registeredClientPo.getClientSecretExpiresAt());
         registeredClientVo.setScopes(Sets.newHashSet(StringUtils.split(registeredClientPo.getScopes(), ",")));
         registeredClientVo.setRedirectUris(Sets.newHashSet(StringUtils.split(registeredClientPo.getRedirectUris(), ",")));
         registeredClientVo.setAuthorizationGrantTypes(Sets.newHashSet(StringUtils.split(registeredClientPo.getAuthorizationGrantTypes(), ",")));
         registeredClientVo.setClientAuthenticationMethods(Sets.newHashSet(StringUtils.split(registeredClientPo.getClientAuthenticationMethods(), ",")));
+        Map<String, Object> tokenSettings = registeredClientPo.getTokenSettings();
+        if (tokenSettings != null) {
+            Object accessTokenTimeToLive = tokenSettings.get(ACCESS_TOKEN_TIME_TO_LIVE);
+            if (accessTokenTimeToLive instanceof Duration duration) {
+                registeredClientVo.setAccessTokenTimeToLive(duration.toSeconds());
+            } else if (accessTokenTimeToLive instanceof Number number) {
+                registeredClientVo.setAccessTokenTimeToLive(number.longValue());
+            }
+            Object refreshTokenTimeToLive = tokenSettings.get(REFRESH_TOKEN_TIME_TO_LIVE);
+            if (refreshTokenTimeToLive instanceof Duration duration) {
+                registeredClientVo.setRefreshTokenTimeToLive(duration.toSeconds());
+            } else if (refreshTokenTimeToLive instanceof Number number) {
+                registeredClientVo.setRefreshTokenTimeToLive(number.longValue());
+            }
+        }
         return registeredClientVo;
     }
 

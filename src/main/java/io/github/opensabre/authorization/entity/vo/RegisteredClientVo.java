@@ -15,13 +15,14 @@ public class RegisteredClientVo extends BaseVo {
     private String id;
     private String clientId;
     private String clientName;
+    private String clientSecret;
     private Date clientIdIssuedAt;
     private Date clientSecretExpiresAt;
     private Set<String> clientAuthenticationMethods;
     private Set<String> authorizationGrantTypes;
     private Set<String> redirectUris;
     private Set<String> scopes;
+    private Long accessTokenTimeToLive;
+    private Long refreshTokenTimeToLive;
 }
-
-
 

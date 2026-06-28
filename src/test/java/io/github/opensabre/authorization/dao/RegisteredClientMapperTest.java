@@ -21,7 +21,7 @@ class RegisteredClientMapperTest {
     @Test
     void testInsert() {
         RegisteredClientPo registeredClientPo = new RegisteredClientPo();
-        registeredClientPo.setClientId("test_client1");
+        registeredClientPo.setClientId("test_client_" + System.nanoTime());
         registeredClientPo.setClientSecret("123456");
         registeredClientPo.setClientName("test");
         registeredClientPo.setClientSecretExpiresAt(Date.from(Instant.now()));
