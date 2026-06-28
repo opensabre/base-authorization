@@ -13,4 +13,11 @@ public interface IUserService {
      */
     @Cacheable(value = "#id")
     User getByUniqueId(String uniqueId);
+
+    /**
+     * 清理指定唯一ID的用户缓存。
+     *
+     * @param uniqueId 唯一ID
+     */
+    void invalidateByUniqueId(String uniqueId);
 }

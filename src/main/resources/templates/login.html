@@ -30,7 +30,7 @@
                 <p>继续访问授权服务与受保护资源。</p>
             </div>
 
-            <div th:if="${param.error}" class="alert alert-danger" role="alert">
+            <div th:if="${loginErrorMessage != null}" class="alert alert-danger" role="alert" th:text="${loginErrorMessage}">
                 账号或密码错误，请重新输入。
             </div>
             <div th:if="${param.logout}" class="alert alert-success" role="alert">
@@ -39,12 +39,22 @@
 
             <div class="form-fields">
                 <div class="form-floating">
-                    <input type="text" id="username" name="username" class="form-control" autocomplete="username" placeholder="用户名" required autofocus>
+                    <input type="text" id="username" name="username" class="form-control" autocomplete="username" placeholder="用户名" th:value="${username}" required autofocus>
                     <label for="username">用户名</label>
                 </div>
                 <div class="form-floating">
                     <input type="password" id="password" name="password" class="form-control" autocomplete="current-password" placeholder="密码" required>
                     <label for="password">密码</label>
+                </div>
+                <div th:if="${captchaRequired}" class="captcha-field" id="captchaField">
+                    <input type="hidden" id="captchaId" name="captchaId">
+                    <div class="form-floating captcha-input">
+                        <input type="text" id="captchaCode" name="captchaCode" class="form-control" autocomplete="off" placeholder="图形验证码" required>
+                        <label for="captchaCode">图形验证码</label>
+                    </div>
+                    <button class="captcha-image-button" type="button" id="refreshCaptcha" aria-label="刷新图形验证码">
+                        <img id="captchaImage" alt="图形验证码">
+                    </button>
                 </div>
             </div>
 
@@ -65,5 +75,38 @@
         </form>
     </section>
 </main>
+<script th:if="${captchaRequired}">
+    (function () {
+        const captchaIdInput = document.getElementById('captchaId');
+        const captchaImage = document.getElementById('captchaImage');
+        const refreshButton = document.getElementById('refreshCaptcha');
+
+        function loadCaptcha() {
+            fetch('/login/captcha/image', {method: 'POST'})
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('captcha request failed');
+                    }
+                    return response.json();
+                })
+                .then(function (responseBody) {
+                    const captcha = responseBody.data || responseBody;
+                    captchaIdInput.value = captcha.captchaId || '';
+                    if (captcha.imageData) {
+                        captchaImage.src = captcha.imageData;
+                    } else {
+                        captchaImage.removeAttribute('src');
+                    }
+                })
+                .catch(function () {
+                    captchaIdInput.value = '';
+                    captchaImage.removeAttribute('src');
+                });
+        }
+
+        refreshButton.addEventListener('click', loadCaptcha);
+        loadCaptcha();
+    })();
+</script>
 </body>
 </html>

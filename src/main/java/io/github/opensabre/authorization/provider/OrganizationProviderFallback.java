@@ -2,6 +2,7 @@ package io.github.opensabre.authorization.provider;
 
 import io.github.opensabre.authorization.entity.Role;
 import io.github.opensabre.authorization.entity.User;
+import io.github.opensabre.authorization.entity.form.OrganizationUserForm;
 import io.github.opensabre.common.core.entity.vo.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -23,5 +24,11 @@ public class OrganizationProviderFallback implements OrganizationProvider {
     public Result<Set<Role>> queryRolesByUserId(String userId) {
         log.warn("queryRolesByUserId downgrade");
         return Result.success(new HashSet<Role>());
+    }
+
+    @Override
+    public boolean updateUser(String userId, OrganizationUserForm userForm) {
+        log.warn("updateUser downgrade");
+        return false;
     }
 }

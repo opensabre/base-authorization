@@ -1,6 +1,9 @@
 package io.github.opensabre.authorization.config;
 
 import jakarta.annotation.Resource;
+import io.github.opensabre.authorization.oauth2.login.LoginAuthenticationFailureHandler;
+import io.github.opensabre.authorization.oauth2.login.LoginAuthenticationSuccessHandler;
+import io.github.opensabre.authorization.oauth2.login.LoginCaptchaAuthenticationFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 
 @Slf4j
@@ -20,6 +24,12 @@ public class WebSecurityConfig {
 
     @Resource
     UserDetailsService userDetailsService;
+    @Resource
+    private LoginCaptchaAuthenticationFilter loginCaptchaAuthenticationFilter;
+    @Resource
+    private LoginAuthenticationSuccessHandler loginAuthenticationSuccessHandler;
+    @Resource
+    private LoginAuthenticationFailureHandler loginAuthenticationFailureHandler;
 
     /**
      * 用于身份验证的 Spring Security 过滤器链
@@ -41,13 +51,17 @@ public class WebSecurityConfig {
                 authorizeHttpRequests
                         .requestMatchers("/doc.html", "/v3/**", "/webjars/**", "/assets/**", "/favicon.svg", "/login")
                         .permitAll()
+                        .requestMatchers("/login/captcha/image")
+                        .permitAll()
                         .requestMatchers("/client**", "/oauth2/activate*", "/oauth2/consent", "/", "/profile")
                         .authenticated());
         // 表单登录处理从授权服务器过滤器链
         httpSecurity
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")
-                        .defaultSuccessUrl("/profile", false))
+                        .successHandler(loginAuthenticationSuccessHandler)
+                        .failureHandler(loginAuthenticationFailureHandler))
+                .addFilterBefore(loginCaptchaAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .userDetailsService(userDetailsService);
         // 添加BearerTokenAuthenticationFilter，将认证服务当做一个资源服务，解析请求头中的token
         httpSecurity.oauth2ResourceServer((resourceServer) -> resourceServer

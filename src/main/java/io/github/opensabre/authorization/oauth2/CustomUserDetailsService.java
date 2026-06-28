@@ -10,7 +10,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,6 +30,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String uniqueId) {
 
         User user = userService.getByUniqueId(uniqueId);
+        if (user == null || !StringUtils.hasText(user.getUsername())) {
+            throw new UsernameNotFoundException("User not found: " + uniqueId);
+        }
         log.info("load user by username :{}", user.toString());
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),

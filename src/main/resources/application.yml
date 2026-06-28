@@ -18,6 +18,11 @@ spring:
 opensabre:
   oauth2:
     issuer-uri: http://www.opensabre.cloud:8000
+  login-security:
+    captcha-threshold: 2
+    lock-threshold: 5
+    failure-expire: 1d
+    captcha-scenario: LOGIN_IMAGE
   rest:
     swagger:
       version: v0.0.1
@@ -49,4 +54,3 @@ mybatis-plus:
   global-config:
     db-config:
       table-prefix: oauth2_
-

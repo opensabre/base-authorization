@@ -3,6 +3,7 @@ package io.github.opensabre.authorization.rest;
 import cn.hutool.core.util.StrUtil;
 import io.github.opensabre.authorization.entity.ScopeWithDescription;
 import io.github.opensabre.authorization.entity.User;
+import io.github.opensabre.authorization.oauth2.login.LoginSecurityService;
 import io.github.opensabre.authorization.service.IUserService;
 import jakarta.annotation.Resource;
 import org.springframework.security.core.Authentication;
@@ -38,6 +39,8 @@ public class AuthorizationController {
 
     @Resource
     private IUserService userService;
+    @Resource
+    private LoginSecurityService loginSecurityService;
 
     /**
      * 登陆页面
@@ -45,7 +48,12 @@ public class AuthorizationController {
      * @return 登陆页面
      */
     @GetMapping("/login")
-    public String login() {
+    public String login(@RequestParam(value = "username", required = false) String username,
+                        @RequestParam(value = "error", required = false) String error,
+                        Model model) {
+        model.addAttribute("username", username);
+        model.addAttribute("captchaRequired", loginSecurityService.isCaptchaRequired(username));
+        model.addAttribute("loginErrorMessage", resolveLoginErrorMessage(error));
         return "login";
     }
 
@@ -144,5 +152,24 @@ public class AuthorizationController {
 
     private static Set<ScopeWithDescription> withDescription(Set<String> scopes) {
         return scopes.stream().map(ScopeWithDescription::new).collect(Collectors.toSet());
+    }
+
+    private static String resolveLoginErrorMessage(String error) {
+        if (!StringUtils.hasText(error)) {
+            return null;
+        }
+        if ("captcha".equals(error)) {
+            return "图形验证码错误，请重新输入。";
+        }
+        if ("LockedException".equals(error)) {
+            return "账户已被锁定，请联系管理员。";
+        }
+        if ("DisabledException".equals(error)) {
+            return "账户已被禁用，请联系管理员。";
+        }
+        if ("AccountExpiredException".equals(error)) {
+            return "账户已过期，请联系管理员。";
+        }
+        return "账号或密码错误，请重新输入。";
     }
 }

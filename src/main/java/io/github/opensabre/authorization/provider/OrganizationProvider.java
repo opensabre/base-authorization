@@ -2,10 +2,13 @@ package io.github.opensabre.authorization.provider;
 
 import io.github.opensabre.authorization.entity.Role;
 import io.github.opensabre.authorization.entity.User;
+import io.github.opensabre.authorization.entity.form.OrganizationUserForm;
 import io.github.opensabre.common.core.entity.vo.Result;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Set;
@@ -18,4 +21,7 @@ public interface OrganizationProvider {
 
     @GetMapping(value = "/role/user/{userId}")
     Result<Set<Role>> queryRolesByUserId(@PathVariable("userId") String userId);
+
+    @PutMapping(value = "/user/{userId}")
+    boolean updateUser(@PathVariable("userId") String userId, @RequestBody OrganizationUserForm userForm);
 }

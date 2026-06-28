@@ -1,5 +1,6 @@
 package io.github.opensabre.authorization.service.impl;
 
+import com.alicp.jetcache.anno.CacheInvalidate;
 import com.alicp.jetcache.anno.CacheType;
 import com.alicp.jetcache.anno.Cached;
 import io.github.opensabre.authorization.entity.User;
@@ -23,5 +24,11 @@ public class UserService implements IUserService {
     @Cached(name = CACHE_PREFIX_KEY, key = "#uniqueId", cacheType = CacheType.BOTH)
     public User getByUniqueId(String uniqueId) {
         return organizationProvider.getUserByUniqueId(uniqueId).getData();
+    }
+
+    @Override
+    @CacheInvalidate(name = CACHE_PREFIX_KEY, key = "#uniqueId")
+    public void invalidateByUniqueId(String uniqueId) {
+        // Annotation-driven cache invalidation.
     }
 }
