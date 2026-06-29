@@ -53,7 +53,7 @@ public class WebSecurityConfig {
                         .permitAll()
                         .requestMatchers("/login/captcha/image")
                         .permitAll()
-                        .requestMatchers("/client**", "/oauth2/activate*", "/oauth2/consent", "/", "/profile")
+                        .requestMatchers("/client", "/client/**", "/oauth2/activate*", "/oauth2/consent", "/", "/profile")
                         .authenticated());
         // 表单登录处理从授权服务器过滤器链
         httpSecurity
