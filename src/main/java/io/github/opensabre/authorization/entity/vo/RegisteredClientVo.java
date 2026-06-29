@@ -16,6 +16,10 @@ public class RegisteredClientVo extends BaseVo {
     private String clientId;
     private String clientName;
     private String clientSecret;
+    private String createdBy;
+    private Date createdTime;
+    private String updatedBy;
+    private Date updatedTime;
     private Date clientIdIssuedAt;
     private Date clientSecretExpiresAt;
     private Set<String> clientAuthenticationMethods;
@@ -25,4 +29,3 @@ public class RegisteredClientVo extends BaseVo {
     private Long accessTokenTimeToLive;
     private Long refreshTokenTimeToLive;
 }
-

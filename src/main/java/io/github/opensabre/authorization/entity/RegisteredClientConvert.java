@@ -131,6 +131,10 @@ public class RegisteredClientConvert {
         registeredClientVo.setClientId(registeredClientPo.getClientId());
         registeredClientVo.setClientName(registeredClientPo.getClientName());
         registeredClientVo.setClientSecret(registeredClientPo.getClientSecret());
+        registeredClientVo.setCreatedBy(registeredClientPo.getCreatedBy());
+        registeredClientVo.setCreatedTime(registeredClientPo.getCreatedTime());
+        registeredClientVo.setUpdatedBy(registeredClientPo.getUpdatedBy());
+        registeredClientVo.setUpdatedTime(registeredClientPo.getUpdatedTime());
         registeredClientVo.setClientIdIssuedAt(registeredClientPo.getClientIdIssuedAt());
         registeredClientVo.setClientSecretExpiresAt(registeredClientPo.getClientSecretExpiresAt());
         registeredClientVo.setScopes(Sets.newHashSet(StringUtils.split(registeredClientPo.getScopes(), ",")));

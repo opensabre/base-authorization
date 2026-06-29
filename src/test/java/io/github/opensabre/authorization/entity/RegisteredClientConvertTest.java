@@ -62,11 +62,19 @@ class RegisteredClientConvertTest {
         registeredClientPo.setRedirectUris("https://baidu.com");
         registeredClientPo.setClientAuthenticationMethods("client_secret_basic");
         registeredClientPo.setClientSecretExpiresAt(new java.util.Date());
+        registeredClientPo.setCreatedBy("admin");
+        registeredClientPo.setUpdatedBy("ops");
+        registeredClientPo.setCreatedTime(new java.util.Date(1000L));
+        registeredClientPo.setUpdatedTime(new java.util.Date(2000L));
         registeredClientPo.setTokenSettings(TokenSettings.builder().accessTokenTimeToLive(java.time.Duration.ofSeconds(7200)).refreshTokenTimeToLive(java.time.Duration.ofSeconds(3600)).build().getSettings());
 
         var registeredClientVo = registeredClientConvert.convertToRegisteredClientVo(registeredClientPo);
 
         assertEquals("abc123", registeredClientVo.getClientSecret());
+        assertEquals("admin", registeredClientVo.getCreatedBy());
+        assertEquals("ops", registeredClientVo.getUpdatedBy());
+        assertEquals(new java.util.Date(1000L), registeredClientVo.getCreatedTime());
+        assertEquals(new java.util.Date(2000L), registeredClientVo.getUpdatedTime());
         assertEquals(7200L, registeredClientVo.getAccessTokenTimeToLive());
         assertEquals(3600L, registeredClientVo.getRefreshTokenTimeToLive());
     }
