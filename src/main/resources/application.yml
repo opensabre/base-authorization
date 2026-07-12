@@ -1,4 +1,10 @@
 spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      repositories:
+        enabled: false
   rabbitmq:
     host: ${RABBIT_MQ_HOST:localhost}
     port: ${RABBIT_MQ_PORT:5672}
@@ -16,6 +22,8 @@ spring:
       maximum-pool-size: 20
 
 opensabre:
+  online-user:
+    session-namespace: ${SPRING_SESSION_REDIS_NAMESPACE:opensabre:gateway:session}
   oauth2:
     issuer-uri: http://www.opensabre.cloud:8000
   login-security:
