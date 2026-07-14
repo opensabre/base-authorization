@@ -18,6 +18,7 @@ import java.io.IOException;
 public class LoginAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
     private final LoginSecurityService loginSecurityService;
+    private final AuthenticationAuditPublisher authenticationAuditPublisher;
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception)
@@ -32,6 +33,8 @@ public class LoginAuthenticationFailureHandler implements AuthenticationFailureH
             error = exception.getClass().getSimpleName();
             log.warn("Login authentication failure: username={}, error={}", username, error, exception);
         }
+
+        authenticationAuditPublisher.recordLoginFailure(request, username, error);
 
         response.sendRedirect(LoginRedirects.failureUrl(request, username, error));
     }

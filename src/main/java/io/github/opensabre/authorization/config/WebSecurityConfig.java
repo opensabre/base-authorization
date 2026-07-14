@@ -4,6 +4,7 @@ import jakarta.annotation.Resource;
 import io.github.opensabre.authorization.oauth2.login.LoginAuthenticationFailureHandler;
 import io.github.opensabre.authorization.oauth2.login.LoginAuthenticationSuccessHandler;
 import io.github.opensabre.authorization.oauth2.login.LoginCaptchaAuthenticationFilter;
+import io.github.opensabre.authorization.oauth2.login.LogoutAuditSuccessHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 
 @Slf4j
@@ -30,6 +32,8 @@ public class WebSecurityConfig {
     private LoginAuthenticationSuccessHandler loginAuthenticationSuccessHandler;
     @Resource
     private LoginAuthenticationFailureHandler loginAuthenticationFailureHandler;
+    @Resource
+    private LogoutAuditSuccessHandler logoutAuditSuccessHandler;
 
     /**
      * 用于身份验证的 Spring Security 过滤器链
@@ -60,9 +64,13 @@ public class WebSecurityConfig {
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")
                         .successHandler(loginAuthenticationSuccessHandler)
-                        .failureHandler(loginAuthenticationFailureHandler))
+                .failureHandler(loginAuthenticationFailureHandler))
                 .addFilterBefore(loginCaptchaAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .userDetailsService(userDetailsService);
+        // 管理台以 DELETE /logout 发起注销，成功后由处理器写入审计日志并返回 204。
+        httpSecurity.logout(logout -> logout
+                .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "DELETE"))
+                .logoutSuccessHandler(logoutAuditSuccessHandler));
         // 添加BearerTokenAuthenticationFilter，将认证服务当做一个资源服务，解析请求头中的token
         httpSecurity.oauth2ResourceServer((resourceServer) -> resourceServer
                 .jwt(Customizer.withDefaults()));

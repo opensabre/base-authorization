@@ -16,12 +16,14 @@ import java.io.IOException;
 public class LoginAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
     private final LoginSecurityService loginSecurityService;
+    private final AuthenticationAuditPublisher authenticationAuditPublisher;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws ServletException, IOException {
         String loginName = request.getParameter("username");
         loginSecurityService.resetFailures(StringUtils.hasText(loginName) ? loginName : authentication.getName());
+        authenticationAuditPublisher.recordLoginSuccess(request, authentication.getName());
         setDefaultTargetUrl("/profile");
         super.onAuthenticationSuccess(request, response, authentication);
     }
