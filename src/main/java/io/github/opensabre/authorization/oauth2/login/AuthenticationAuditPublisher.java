@@ -2,12 +2,13 @@ package io.github.opensabre.authorization.oauth2.login;
 
 import io.github.opensabre.governance.audit.annotations.OperationType;
 import io.github.opensabre.governance.audit.entity.AuditInfo;
-import io.github.opensabre.governance.audit.event.AuditEvent;
+import io.github.opensabre.eda.api.EdaEvent;
+import io.github.opensabre.eda.api.EdaEventPublisher;
+import io.github.opensabre.governance.audit.event.DefaultAuditEventHandler;
 import io.github.opensabre.webmvc.util.HttpUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -19,7 +20,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class AuthenticationAuditPublisher {
 
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final EdaEventPublisher eventPublisher;
 
     /**
      * 记录一次成功登录。
@@ -68,6 +69,7 @@ public class AuthenticationAuditPublisher {
                 .executionTime(0L)
                 .targetKey(StringUtils.defaultIfBlank(username, "anonymous"))
                 .build();
-        applicationEventPublisher.publishEvent(new AuditEvent(auditInfo));
+        EdaEvent<AuditInfo> event = EdaEvent.of(DefaultAuditEventHandler.EVENT_TYPE, "authorization", auditInfo);
+        eventPublisher.publishLocal(event);
     }
 }
