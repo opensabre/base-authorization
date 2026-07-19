@@ -130,7 +130,8 @@ public class RegisteredClientConvert {
         registeredClientVo.setId(registeredClientPo.getId());
         registeredClientVo.setClientId(registeredClientPo.getClientId());
         registeredClientVo.setClientName(registeredClientPo.getClientName());
-        registeredClientVo.setClientSecret(registeredClientPo.getClientSecret());
+        // 客户端密钥哈希同样属于敏感信息，管理 API 仅允许创建/轮换时提交明文，永不回显。
+        registeredClientVo.setClientSecret(null);
         registeredClientVo.setCreatedBy(registeredClientPo.getCreatedBy());
         registeredClientVo.setCreatedTime(registeredClientPo.getCreatedTime());
         registeredClientVo.setUpdatedBy(registeredClientPo.getUpdatedBy());

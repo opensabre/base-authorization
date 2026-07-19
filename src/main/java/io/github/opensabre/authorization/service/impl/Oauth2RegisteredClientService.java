@@ -70,7 +70,6 @@ public class Oauth2RegisteredClientService extends ServiceImpl<RegisteredClientM
     }
 
     @Override
-    @Cached(name = CACHE_PREFIX_KEY, key = "#clientId", cacheType = CacheType.BOTH)
     public RegisteredClientPo getByClientId(String clientId) {
         QueryWrapper<RegisteredClientPo> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("client_id", clientId);
