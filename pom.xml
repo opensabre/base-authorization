@@ -80,6 +80,12 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- 运行时使用 MySQL，镜像必须携带 JDBC 驱动。 -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <scope>runtime</scope>
+        </dependency>
         <!--oauth2依赖-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
