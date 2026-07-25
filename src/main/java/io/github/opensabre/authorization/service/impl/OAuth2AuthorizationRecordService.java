@@ -34,6 +34,8 @@ public class OAuth2AuthorizationRecordService implements IOAuth2AuthorizationRec
 
     @Override
     public boolean revoke(String id) {
+        // Spring Authorization Server删除授权聚合后会拒绝后续刷新；
+        // 已签发的自包含JWT不依赖数据库校验，因此仍按自身过期时间失效。
         OAuth2Authorization authorization = authorizationService.findById(id);
         if (authorization == null) {
             return false;

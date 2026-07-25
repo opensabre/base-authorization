@@ -11,5 +11,12 @@ public interface IOAuth2AuthorizationRecordService {
 
     OAuth2AuthorizationRecordVo get(String id);
 
+    /**
+     * 删除服务端授权聚合并阻止刷新令牌继续使用。
+     * 自包含访问令牌不依赖该聚合校验，将持续有效至自身过期。
+     *
+     * @param id OAuth2授权记录ID
+     * @return 记录存在并已删除时返回true
+     */
     boolean revoke(String id);
 }

@@ -85,8 +85,10 @@ public class OAuth2AuthorizationRecordRepository {
             arguments.add(param.getAuthorizationGrantType().trim());
         }
         if ("ACTIVE".equalsIgnoreCase(param.getStatus())) {
-            where.append(" AND (a.access_token_expires_at > CURRENT_TIMESTAMP")
-                    .append(" OR a.refresh_token_expires_at > CURRENT_TIMESTAMP)");
+            where.append(" AND a.access_token_expires_at > CURRENT_TIMESTAMP");
+        } else if ("REFRESHABLE".equalsIgnoreCase(param.getStatus())) {
+            where.append(" AND (a.access_token_expires_at IS NULL OR a.access_token_expires_at <= CURRENT_TIMESTAMP)")
+                    .append(" AND a.refresh_token_expires_at > CURRENT_TIMESTAMP");
         } else if ("EXPIRED".equalsIgnoreCase(param.getStatus())) {
             where.append(" AND (a.access_token_expires_at IS NULL OR a.access_token_expires_at <= CURRENT_TIMESTAMP)")
                     .append(" AND (a.refresh_token_expires_at IS NULL OR a.refresh_token_expires_at <= CURRENT_TIMESTAMP)");

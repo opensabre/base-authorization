@@ -5,6 +5,8 @@ import io.github.opensabre.authorization.entity.form.OAuth2AuthorizationQueryFor
 import io.github.opensabre.authorization.entity.param.OAuth2AuthorizationQueryParam;
 import io.github.opensabre.authorization.entity.vo.OAuth2AuthorizationRecordVo;
 import io.github.opensabre.authorization.service.IOAuth2AuthorizationRecordService;
+import io.github.opensabre.governance.audit.annotations.Audit;
+import io.github.opensabre.governance.audit.annotations.OperationType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,8 +44,16 @@ public class OAuth2AuthorizationRecordController {
         return authorizationRecordService.get(id);
     }
 
-    @Operation(summary = "撤销OAuth2授权记录")
+    @Operation(
+            summary = "终止OAuth2服务端授权",
+            description = "删除服务端授权记录并阻止Refresh Token继续使用；已签发的自包含JWT Access Token仍有效至过期")
     @DeleteMapping("/{id}")
+    @Audit(
+            operationType = OperationType.DELETE,
+            description = "终止OAuth2服务端授权",
+            module = "OAUTH2_AUTHORIZATION",
+            response = true,
+            key = "#id")
     public Boolean revoke(
             @Parameter(description = "授权记录ID", required = true) @PathVariable String id) {
         return authorizationRecordService.revoke(id);
