@@ -14,6 +14,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -44,7 +46,9 @@ public class WebSecurityConfig {
      */
     @Bean
     @Order(2)
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain defaultSecurityFilterChain(
+            HttpSecurity httpSecurity,
+            JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
         log.info("Init HttpSecurity for Security");
         // web站点基本安全配置
         httpSecurity
@@ -57,6 +61,8 @@ public class WebSecurityConfig {
                         .permitAll()
                         .requestMatchers("/login/captcha/image")
                         .permitAll()
+                        .requestMatchers("/authorizations", "/authorizations/**")
+                        .hasAnyAuthority("ADMIN", "IT")
                         .requestMatchers("/client", "/client/**", "/online-users", "/online-users/**", "/oauth2/activate*", "/oauth2/consent", "/", "/profile")
                         .authenticated());
         // 表单登录处理从授权服务器过滤器链
@@ -73,7 +79,22 @@ public class WebSecurityConfig {
                 .logoutSuccessHandler(logoutAuditSuccessHandler));
         // 添加BearerTokenAuthenticationFilter，将认证服务当做一个资源服务，解析请求头中的token
         httpSecurity.oauth2ResourceServer((resourceServer) -> resourceServer
-                .jwt(Customizer.withDefaults()));
+                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
         return httpSecurity.build();
+    }
+
+    /**
+     * 从 JWT roles 声明恢复应用角色，保证直连授权服务时也执行管理角色校验。
+     *
+     * @return JWT 认证转换器
+     */
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        authoritiesConverter.setAuthoritiesClaimName("roles");
+        authoritiesConverter.setAuthorityPrefix("");
+        JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
+        authenticationConverter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
+        return authenticationConverter;
     }
 }
