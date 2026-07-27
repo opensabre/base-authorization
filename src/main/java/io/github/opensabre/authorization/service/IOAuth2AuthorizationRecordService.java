@@ -19,4 +19,11 @@ public interface IOAuth2AuthorizationRecordService {
      * @return 记录存在并已删除时返回true
      */
     boolean revoke(String id);
+
+    /**
+     * 删除所有授权材料均已过期的OAuth2授权记录。
+     *
+     * @return 删除的授权记录数
+     */
+    int cleanupExpired();
 }
