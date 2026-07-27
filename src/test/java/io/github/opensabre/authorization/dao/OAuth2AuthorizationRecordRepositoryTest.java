@@ -40,8 +40,12 @@ class OAuth2AuthorizationRecordRepositoryTest {
                     access_token_type VARCHAR(100),
                     access_token_issued_at TIMESTAMP,
                     access_token_expires_at TIMESTAMP,
+                    authorization_code_expires_at TIMESTAMP,
+                    oidc_id_token_expires_at TIMESTAMP,
                     refresh_token_issued_at TIMESTAMP,
                     refresh_token_expires_at TIMESTAMP,
+                    user_code_expires_at TIMESTAMP,
+                    device_code_expires_at TIMESTAMP,
                     oidc_id_token_value BLOB,
                     device_code_value BLOB
                 )
@@ -62,6 +66,22 @@ class OAuth2AuthorizationRecordRepositoryTest {
         assertThat(query("ACTIVE")).containsExactly("active");
         assertThat(query("REFRESHABLE")).containsExactly("refreshable");
         assertThat(query("EXPIRED")).containsExactly("expired");
+    }
+
+    @Test
+    void shouldDeleteOnlyRecordsWhoseEveryAuthorizationMaterialHasExpired() {
+        Instant now = Instant.now();
+        insert("expired", now.minusSeconds(120), now.minusSeconds(60), now.minusSeconds(1));
+        insert("refreshable", now.minusSeconds(30), now.minusSeconds(1), now.plusSeconds(120));
+        insert("active-device-code", now.minusSeconds(30), now.minusSeconds(1), now.minusSeconds(1));
+        jdbcTemplate.update(
+                "UPDATE oauth2_authorization SET device_code_expires_at = ? WHERE id = ?",
+                Timestamp.from(now.plusSeconds(60)), "active-device-code");
+
+        assertThat(repository.deleteExpired(now)).isEqualTo(1);
+        assertThat(jdbcTemplate.queryForList(
+                "SELECT id FROM oauth2_authorization ORDER BY id", String.class))
+                .containsExactly("active-device-code", "refreshable");
     }
 
     private java.util.List<String> query(String status) {

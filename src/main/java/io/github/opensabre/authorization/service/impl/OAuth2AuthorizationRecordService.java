@@ -10,6 +10,8 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+
 @Service
 public class OAuth2AuthorizationRecordService implements IOAuth2AuthorizationRecordService {
 
@@ -42,5 +44,11 @@ public class OAuth2AuthorizationRecordService implements IOAuth2AuthorizationRec
         }
         authorizationService.remove(authorization);
         return true;
+    }
+
+    @Override
+    public int cleanupExpired() {
+        // 以同一个时间点判断所有授权材料，避免清理过程中跨秒导致边界不一致。
+        return repository.deleteExpired(Instant.now());
     }
 }

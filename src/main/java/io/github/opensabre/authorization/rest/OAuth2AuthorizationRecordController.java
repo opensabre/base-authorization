@@ -58,4 +58,17 @@ public class OAuth2AuthorizationRecordController {
             @Parameter(description = "授权记录ID", required = true) @PathVariable String id) {
         return authorizationRecordService.revoke(id);
     }
+
+    @Operation(
+            summary = "清理已失效OAuth2授权记录",
+            description = "仅删除所有Token、授权码和设备码均已过期的服务端授权记录")
+    @DeleteMapping("/expired/cleanup")
+    @Audit(
+            operationType = OperationType.DELETE,
+            description = "清理已失效OAuth2授权记录",
+            module = "OAUTH2_AUTHORIZATION",
+            response = true)
+    public Integer cleanupExpired() {
+        return authorizationRecordService.cleanupExpired();
+    }
 }

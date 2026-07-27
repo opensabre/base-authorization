@@ -34,4 +34,12 @@ class OAuth2AuthorizationRecordServiceTest {
 
         assertThat(service.revoke("missing")).isFalse();
     }
+
+    @Test
+    void shouldDeleteExpiredAuthorizationsUsingCurrentCutoff() {
+        when(repository.deleteExpired(org.mockito.ArgumentMatchers.any())).thenReturn(3);
+
+        assertThat(service.cleanupExpired()).isEqualTo(3);
+        verify(repository).deleteExpired(org.mockito.ArgumentMatchers.any());
+    }
 }

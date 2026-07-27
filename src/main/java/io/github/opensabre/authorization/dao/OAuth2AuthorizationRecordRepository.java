@@ -69,6 +69,32 @@ public class OAuth2AuthorizationRecordRepository {
         return records.stream().findFirst();
     }
 
+    /**
+     * 删除至少签发过一种授权材料，且所有授权材料都已到期的聚合记录。
+     * 空有效期不视为过期，防止误删尚未签发Token的授权码或设备码流程。
+     *
+     * @param expiredBefore 过期截止时间
+     * @return 删除记录数
+     */
+    public int deleteExpired(Instant expiredBefore) {
+        Timestamp cutoff = Timestamp.from(expiredBefore);
+        return jdbcTemplate.update("""
+                DELETE FROM oauth2_authorization
+                 WHERE (authorization_code_expires_at IS NOT NULL
+                     OR access_token_expires_at IS NOT NULL
+                     OR oidc_id_token_expires_at IS NOT NULL
+                     OR refresh_token_expires_at IS NOT NULL
+                     OR user_code_expires_at IS NOT NULL
+                     OR device_code_expires_at IS NOT NULL)
+                   AND (authorization_code_expires_at IS NULL OR authorization_code_expires_at <= ?)
+                   AND (access_token_expires_at IS NULL OR access_token_expires_at <= ?)
+                   AND (oidc_id_token_expires_at IS NULL OR oidc_id_token_expires_at <= ?)
+                   AND (refresh_token_expires_at IS NULL OR refresh_token_expires_at <= ?)
+                   AND (user_code_expires_at IS NULL OR user_code_expires_at <= ?)
+                   AND (device_code_expires_at IS NULL OR device_code_expires_at <= ?)
+                """, cutoff, cutoff, cutoff, cutoff, cutoff, cutoff);
+    }
+
     private SqlCondition buildCondition(OAuth2AuthorizationQueryParam param) {
         StringBuilder where = new StringBuilder(" WHERE 1 = 1");
         List<Object> arguments = new ArrayList<>();
