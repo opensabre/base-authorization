@@ -69,6 +69,27 @@ class OAuth2AuthorizationRecordRepositoryTest {
     }
 
     @Test
+    void shouldTreatAuthorizationAndDeviceFlowsAsAuthorizingUntilTheirCodesExpire() {
+        Instant now = Instant.now();
+        insertCodeOnly("authorization-code", "authorization_code_expires_at", now.plusSeconds(60));
+        insertCodeOnly("device-code", "device_code_expires_at", now.plusSeconds(60));
+        insertCodeOnly("expired-code", "authorization_code_expires_at", now.minusSeconds(1));
+
+        assertThat(query("AUTHORIZING")).containsExactlyInAnyOrder("authorization-code", "device-code");
+        assertThat(query("EXPIRED")).containsExactly("expired-code");
+    }
+
+    @Test
+    void shouldTreatAValidIdTokenAsActiveAndARefreshTokenOnlyRecordAsRefreshable() {
+        Instant now = Instant.now();
+        insertCodeOnly("id-token", "oidc_id_token_expires_at", now.plusSeconds(60));
+        insertCodeOnly("refresh-only", "refresh_token_expires_at", now.plusSeconds(60));
+
+        assertThat(query("ACTIVE")).containsExactly("id-token");
+        assertThat(query("REFRESHABLE")).containsExactly("refresh-only");
+    }
+
+    @Test
     void shouldDeleteOnlyRecordsWhoseEveryAuthorizationMaterialHasExpired() {
         Instant now = Instant.now();
         insert("expired", now.minusSeconds(120), now.minusSeconds(60), now.minusSeconds(1));
@@ -78,7 +99,7 @@ class OAuth2AuthorizationRecordRepositoryTest {
                 "UPDATE oauth2_authorization SET device_code_expires_at = ? WHERE id = ?",
                 Timestamp.from(now.plusSeconds(60)), "active-device-code");
 
-        assertThat(repository.deleteExpired(now)).isEqualTo(1);
+        assertThat(repository.deleteExpiredBatch(now, 100)).isEqualTo(1);
         assertThat(jdbcTemplate.queryForList(
                 "SELECT id FROM oauth2_authorization ORDER BY id", String.class))
                 .containsExactly("active-device-code", "refreshable");
@@ -103,5 +124,14 @@ class OAuth2AuthorizationRecordRepositoryTest {
                 id, "client-record", "operator", "authorization_code", "openid,profile", "Bearer",
                 Timestamp.from(issuedAt), Timestamp.from(accessExpiresAt),
                 Timestamp.from(issuedAt), Timestamp.from(refreshExpiresAt));
+    }
+
+    private void insertCodeOnly(String id, String expiresColumn, Instant expiresAt) {
+        jdbcTemplate.update("""
+                INSERT INTO oauth2_authorization (
+                    id, registered_client_id, principal_name, authorization_grant_type, %s)
+                VALUES (?, ?, ?, ?, ?)
+                """.formatted(expiresColumn), id, "client-record", "operator",
+                "authorization_code", Timestamp.from(expiresAt));
     }
 }
