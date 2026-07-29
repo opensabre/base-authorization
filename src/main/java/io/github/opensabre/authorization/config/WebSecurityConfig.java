@@ -61,7 +61,9 @@ public class WebSecurityConfig {
                         .permitAll()
                         .requestMatchers("/login/captcha/image")
                         .permitAll()
-                        .requestMatchers("/authorizations", "/authorizations/**")
+                        .requestMatchers(
+                                "/authorizations", "/authorizations/**",
+                                "/authorization-consents", "/authorization-consents/**")
                         .hasAnyAuthority("ADMIN", "IT")
                         .requestMatchers("/client", "/client/**", "/online-users", "/online-users/**", "/oauth2/activate*", "/oauth2/consent", "/", "/profile")
                         .authenticated());
