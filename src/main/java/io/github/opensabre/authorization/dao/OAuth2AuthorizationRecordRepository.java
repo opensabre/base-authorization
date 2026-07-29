@@ -22,9 +22,11 @@ public class OAuth2AuthorizationRecordRepository {
     private static final String SELECT_COLUMNS = """
             SELECT a.id, c.client_id, c.client_name, a.principal_name,
                    a.authorization_grant_type, a.authorized_scopes,
-                   a.access_token_type, a.access_token_issued_at,
+                   a.access_token_type, a.authorization_code_expires_at,
+                   a.access_token_issued_at,
                    a.access_token_expires_at, a.refresh_token_issued_at,
-                   a.refresh_token_expires_at,
+                   a.refresh_token_expires_at, a.oidc_id_token_expires_at,
+                   a.user_code_expires_at, a.device_code_expires_at,
                    CASE WHEN a.oidc_id_token_value IS NULL THEN 0 ELSE 1 END AS has_id_token,
                    CASE WHEN a.device_code_value IS NULL THEN 0 ELSE 1 END AS has_device_code
               FROM oauth2_authorization a
@@ -76,23 +78,24 @@ public class OAuth2AuthorizationRecordRepository {
      * @param expiredBefore 过期截止时间
      * @return 删除记录数
      */
-    public int deleteExpired(Instant expiredBefore) {
+    public int deleteExpiredBatch(Instant expiredBefore, int batchSize) {
         Timestamp cutoff = Timestamp.from(expiredBefore);
-        return jdbcTemplate.update("""
-                DELETE FROM oauth2_authorization
-                 WHERE (authorization_code_expires_at IS NOT NULL
-                     OR access_token_expires_at IS NOT NULL
-                     OR oidc_id_token_expires_at IS NOT NULL
-                     OR refresh_token_expires_at IS NOT NULL
-                     OR user_code_expires_at IS NOT NULL
-                     OR device_code_expires_at IS NOT NULL)
-                   AND (authorization_code_expires_at IS NULL OR authorization_code_expires_at <= ?)
-                   AND (access_token_expires_at IS NULL OR access_token_expires_at <= ?)
-                   AND (oidc_id_token_expires_at IS NULL OR oidc_id_token_expires_at <= ?)
-                   AND (refresh_token_expires_at IS NULL OR refresh_token_expires_at <= ?)
-                   AND (user_code_expires_at IS NULL OR user_code_expires_at <= ?)
-                   AND (device_code_expires_at IS NULL OR device_code_expires_at <= ?)
-                """, cutoff, cutoff, cutoff, cutoff, cutoff, cutoff);
+        List<String> ids = jdbcTemplate.queryForList("""
+                SELECT id FROM oauth2_authorization
+                 WHERE """ + expiredPredicate("?") + """
+                 ORDER BY id
+                 LIMIT ?
+                """, String.class, cutoff, cutoff, cutoff, cutoff, cutoff, cutoff, batchSize);
+        if (ids.isEmpty()) {
+            return 0;
+        }
+        String placeholders = String.join(",", java.util.Collections.nCopies(ids.size(), "?"));
+        List<Object> deleteArguments = new ArrayList<>(ids);
+        deleteArguments.addAll(java.util.Collections.nCopies(6, cutoff));
+        return jdbcTemplate.update(
+                "DELETE FROM oauth2_authorization WHERE id IN (" + placeholders + ") AND "
+                        + expiredPredicate("?"),
+                deleteArguments.toArray());
     }
 
     private SqlCondition buildCondition(OAuth2AuthorizationQueryParam param) {
@@ -111,13 +114,21 @@ public class OAuth2AuthorizationRecordRepository {
             arguments.add(param.getAuthorizationGrantType().trim());
         }
         if ("ACTIVE".equalsIgnoreCase(param.getStatus())) {
-            where.append(" AND a.access_token_expires_at > CURRENT_TIMESTAMP");
+            where.append(" AND (a.access_token_expires_at > CURRENT_TIMESTAMP")
+                    .append(" OR a.oidc_id_token_expires_at > CURRENT_TIMESTAMP)");
         } else if ("REFRESHABLE".equalsIgnoreCase(param.getStatus())) {
             where.append(" AND (a.access_token_expires_at IS NULL OR a.access_token_expires_at <= CURRENT_TIMESTAMP)")
+                    .append(" AND (a.oidc_id_token_expires_at IS NULL OR a.oidc_id_token_expires_at <= CURRENT_TIMESTAMP)")
                     .append(" AND a.refresh_token_expires_at > CURRENT_TIMESTAMP");
-        } else if ("EXPIRED".equalsIgnoreCase(param.getStatus())) {
+        } else if ("AUTHORIZING".equalsIgnoreCase(param.getStatus())) {
             where.append(" AND (a.access_token_expires_at IS NULL OR a.access_token_expires_at <= CURRENT_TIMESTAMP)")
-                    .append(" AND (a.refresh_token_expires_at IS NULL OR a.refresh_token_expires_at <= CURRENT_TIMESTAMP)");
+                    .append(" AND (a.oidc_id_token_expires_at IS NULL OR a.oidc_id_token_expires_at <= CURRENT_TIMESTAMP)")
+                    .append(" AND (a.refresh_token_expires_at IS NULL OR a.refresh_token_expires_at <= CURRENT_TIMESTAMP)")
+                    .append(" AND (a.authorization_code_expires_at > CURRENT_TIMESTAMP")
+                    .append(" OR a.user_code_expires_at > CURRENT_TIMESTAMP")
+                    .append(" OR a.device_code_expires_at > CURRENT_TIMESTAMP)");
+        } else if ("EXPIRED".equalsIgnoreCase(param.getStatus())) {
+            where.append(" AND ").append(expiredPredicate("CURRENT_TIMESTAMP"));
         }
         return new SqlCondition(where.toString(), arguments);
     }
@@ -132,10 +143,14 @@ public class OAuth2AuthorizationRecordRepository {
             record.setAuthorizationGrantType(resultSet.getString("authorization_grant_type"));
             record.setAuthorizedScopes(resultSet.getString("authorized_scopes"));
             record.setAccessTokenType(resultSet.getString("access_token_type"));
+            record.setAuthorizationCodeExpiresAt(toDate(resultSet.getTimestamp("authorization_code_expires_at")));
             record.setAccessTokenIssuedAt(toDate(resultSet.getTimestamp("access_token_issued_at")));
             record.setAccessTokenExpiresAt(toDate(resultSet.getTimestamp("access_token_expires_at")));
+            record.setIdTokenExpiresAt(toDate(resultSet.getTimestamp("oidc_id_token_expires_at")));
             record.setRefreshTokenIssuedAt(toDate(resultSet.getTimestamp("refresh_token_issued_at")));
             record.setRefreshTokenExpiresAt(toDate(resultSet.getTimestamp("refresh_token_expires_at")));
+            record.setUserCodeExpiresAt(toDate(resultSet.getTimestamp("user_code_expires_at")));
+            record.setDeviceCodeExpiresAt(toDate(resultSet.getTimestamp("device_code_expires_at")));
             record.setHasIdToken(resultSet.getBoolean("has_id_token"));
             record.setHasDeviceCode(resultSet.getBoolean("has_device_code"));
             record.setStatus(resolveStatus(record));
@@ -149,17 +164,39 @@ public class OAuth2AuthorizationRecordRepository {
 
     private static String resolveStatus(OAuth2AuthorizationRecordVo record) {
         Instant now = Instant.now();
-        if (isAfter(record.getAccessTokenExpiresAt(), now)) {
+        if (isAfter(record.getAccessTokenExpiresAt(), now) || isAfter(record.getIdTokenExpiresAt(), now)) {
             return "ACTIVE";
         }
         if (isAfter(record.getRefreshTokenExpiresAt(), now)) {
             return "REFRESHABLE";
+        }
+        if (isAfter(record.getAuthorizationCodeExpiresAt(), now)
+                || isAfter(record.getUserCodeExpiresAt(), now)
+                || isAfter(record.getDeviceCodeExpiresAt(), now)) {
+            return "AUTHORIZING";
         }
         return "EXPIRED";
     }
 
     private static boolean isAfter(Date value, Instant instant) {
         return value != null && value.toInstant().isAfter(instant);
+    }
+
+    private static String expiredPredicate(String cutoff) {
+        return """
+                (authorization_code_expires_at IS NOT NULL
+                    OR access_token_expires_at IS NOT NULL
+                    OR oidc_id_token_expires_at IS NOT NULL
+                    OR refresh_token_expires_at IS NOT NULL
+                    OR user_code_expires_at IS NOT NULL
+                    OR device_code_expires_at IS NOT NULL)
+                AND (authorization_code_expires_at IS NULL OR authorization_code_expires_at <= %1$s)
+                AND (access_token_expires_at IS NULL OR access_token_expires_at <= %1$s)
+                AND (oidc_id_token_expires_at IS NULL OR oidc_id_token_expires_at <= %1$s)
+                AND (refresh_token_expires_at IS NULL OR refresh_token_expires_at <= %1$s)
+                AND (user_code_expires_at IS NULL OR user_code_expires_at <= %1$s)
+                AND (device_code_expires_at IS NULL OR device_code_expires_at <= %1$s)
+                """.formatted(cutoff);
     }
 
     private record SqlCondition(String whereClause, List<Object> arguments) {
