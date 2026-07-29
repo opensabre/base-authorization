@@ -26,6 +26,13 @@ opensabre:
     session-namespace: ${SPRING_SESSION_REDIS_NAMESPACE:opensabre:gateway:session}
   oauth2:
     issuer-uri: http://www.opensabre.cloud:8000
+    authorization:
+      cleanup:
+        enabled: ${OAUTH2_AUTHORIZATION_CLEANUP_ENABLED:false}
+        cron: ${OAUTH2_AUTHORIZATION_CLEANUP_CRON:0 0 * * * *}
+        retention: ${OAUTH2_AUTHORIZATION_CLEANUP_RETENTION:7d}
+        batch-size: ${OAUTH2_AUTHORIZATION_CLEANUP_BATCH_SIZE:500}
+        max-batches-per-run: ${OAUTH2_AUTHORIZATION_CLEANUP_MAX_BATCHES:20}
   login-security:
     captcha-threshold: 2
     lock-threshold: 5

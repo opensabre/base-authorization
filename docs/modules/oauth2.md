@@ -40,3 +40,26 @@
 | `DELETE` | `/authorizations/expired/cleanup` | 仅清理所有 Token、授权码和设备码均已过期的记录 |
 
 终止服务端授权不能撤回已经签发的自包含 JWT Access Token；它仍有效到 `exp`。清理操作带审计，管理端按钮和后端资源权限分别由 Organization 服务配置。
+
+授权记录状态按聚合中仍有效的授权材料统一计算，优先级为：
+
+- `ACTIVE`：Access Token 或 ID Token 仍有效；
+- `REFRESHABLE`：前述 Token 已失效，但 Refresh Token 仍有效；
+- `AUTHORIZING`：尚未完成令牌签发，Authorization Code、User Code 或 Device Code 仍有效；
+- `EXPIRED`：签发过授权材料且全部失效，此状态与清理资格一致。
+
+## 过期记录保留与定时清理
+
+定时清理默认关闭。启用后只删除“全部授权材料失效时间早于当前时间减保留期”的记录，并按批次和单次最大批数限流；中途失败时已完成批次保留，下次调度从剩余记录继续。
+
+| 配置 | 默认值 | 说明 |
+| --- | --- | --- |
+| `opensabre.oauth2.authorization.cleanup.enabled` | `false` | 是否启用定时清理 |
+| `opensabre.oauth2.authorization.cleanup.cron` | `0 0 * * * *` | 每小时执行一次 |
+| `opensabre.oauth2.authorization.cleanup.retention` | `7d` | 过期记录保留期 |
+| `opensabre.oauth2.authorization.cleanup.batch-size` | `500` | 单批删除上限 |
+| `opensabre.oauth2.authorization.cleanup.max-batches-per-run` | `20` | 单次任务最大批数 |
+
+任务复用现有审计事件链路，执行结果会进入统一审计日志；同时暴露
+`opensabre.oauth2.authorization.cleanup.runs`、`opensabre.oauth2.authorization.cleanup.deleted`
+和 `opensabre.oauth2.authorization.cleanup.duration` 指标。

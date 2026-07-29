@@ -3,6 +3,7 @@ package io.github.opensabre.authorization.service.impl;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.github.opensabre.authorization.dao.OAuth2AuthorizationRecordRepository;
+import io.github.opensabre.authorization.config.OAuth2AuthorizationCleanupProperties;
 import io.github.opensabre.authorization.entity.param.OAuth2AuthorizationQueryParam;
 import io.github.opensabre.authorization.entity.vo.OAuth2AuthorizationRecordVo;
 import io.github.opensabre.authorization.service.IOAuth2AuthorizationRecordService;
@@ -17,11 +18,14 @@ public class OAuth2AuthorizationRecordService implements IOAuth2AuthorizationRec
 
     private final OAuth2AuthorizationRecordRepository repository;
     private final OAuth2AuthorizationService authorizationService;
+    private final OAuth2AuthorizationCleanupProperties cleanupProperties;
 
     public OAuth2AuthorizationRecordService(OAuth2AuthorizationRecordRepository repository,
-                                            OAuth2AuthorizationService authorizationService) {
+                                            OAuth2AuthorizationService authorizationService,
+                                            OAuth2AuthorizationCleanupProperties cleanupProperties) {
         this.repository = repository;
         this.authorizationService = authorizationService;
+        this.cleanupProperties = cleanupProperties;
     }
 
     @Override
@@ -48,7 +52,20 @@ public class OAuth2AuthorizationRecordService implements IOAuth2AuthorizationRec
 
     @Override
     public int cleanupExpired() {
-        // 以同一个时间点判断所有授权材料，避免清理过程中跨秒导致边界不一致。
-        return repository.deleteExpired(Instant.now());
+        return cleanupExpiredBefore(Instant.now());
+    }
+
+    public int cleanupExpiredBefore(Instant cutoff) {
+        int total = 0;
+        int batchSize = Math.max(1, cleanupProperties.getBatchSize());
+        int maxBatches = Math.max(1, cleanupProperties.getMaxBatchesPerRun());
+        for (int batch = 0; batch < maxBatches; batch++) {
+            int deleted = repository.deleteExpiredBatch(cutoff, batchSize);
+            total += deleted;
+            if (deleted < batchSize) {
+                break;
+            }
+        }
+        return total;
     }
 }
