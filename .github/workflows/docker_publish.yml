@@ -80,6 +80,7 @@ jobs:
         run: >-
           mvn --batch-mode --no-transfer-progress
           -DskipTests
+          compile
           jib:build
           -Dsecret.id=${{ secrets.DOCKER_CLOUD_SECRET_ID }}
           -Dsecret.key=${{ secrets.DOCKER_CLOUD_SECRET_KEY }}
