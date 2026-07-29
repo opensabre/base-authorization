@@ -2,20 +2,23 @@ package io.github.opensabre.authorization.entity;
 
 import io.github.opensabre.authorization.entity.form.RegisteredClientForm;
 import io.github.opensabre.authorization.entity.po.RegisteredClientPo;
-import jakarta.annotation.Resource;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.util.collections.Sets;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-@SpringBootTest
 class RegisteredClientConvertTest {
 
-    @Resource
-    RegisteredClientConvert registeredClientConvert;
+    private RegisteredClientConvert registeredClientConvert;
+
+    @BeforeEach
+    void setUp() {
+        registeredClientConvert = new RegisteredClientConvert();
+    }
 
     @Test
     void testRegisteredClientPoConvertToRegisteredClient() {
@@ -70,7 +73,8 @@ class RegisteredClientConvertTest {
 
         var registeredClientVo = registeredClientConvert.convertToRegisteredClientVo(registeredClientPo);
 
-        assertEquals("abc123", registeredClientVo.getClientSecret());
+        // 客户端密钥及其哈希禁止通过管理查询接口回显。
+        assertNull(registeredClientVo.getClientSecret());
         assertEquals("admin", registeredClientVo.getCreatedBy());
         assertEquals("ops", registeredClientVo.getUpdatedBy());
         assertEquals(new java.util.Date(1000L), registeredClientVo.getCreatedTime());
