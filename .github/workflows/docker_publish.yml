@@ -1,4 +1,4 @@
-name: Build and Push with Jib
+name: Test, Build and Push with Jib
 
 on:
   push:
@@ -7,21 +7,79 @@ on:
   pull_request:
     branches: [ master ]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: authorization-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build-and-push:
+  test:
+    name: Maven Verify
     runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
     env:
-      REGISTRY_URL: 'ccr.ccs.tencentyun.com/opensabre' # 替换为你的镜像提交地址
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5.6.0
         with:
-          java-version: '21' # 或你项目使用的JDK版本
+          java-version: '21'
           distribution: 'temurin'
+          cache: maven
+
+      - name: Run Tests
+        run: mvn --batch-mode --no-transfer-progress verify
+
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: test-reports-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            target/surefire-reports/
+            target/failsafe-reports/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  build-and-push:
+    name: Build and Push Image
+    if: github.event_name == 'push'
+    needs: test
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY_URL: 'ccr.ccs.tencentyun.com/opensabre'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7.0.1
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5.6.0
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
 
       - name: Build and Push with Jib
-        run: mvn compile jib:build -Dsecret.id=${{ secrets.DOCKER_CLOUD_SECRET_ID }} -Dsecret.key=${{ secrets.DOCKER_CLOUD_SECRET_KEY }}
+        run: >-
+          mvn --batch-mode --no-transfer-progress
+          -DskipTests
+          jib:build
+          -Dsecret.id=${{ secrets.DOCKER_CLOUD_SECRET_ID }}
+          -Dsecret.key=${{ secrets.DOCKER_CLOUD_SECRET_KEY }}
