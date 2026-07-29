@@ -29,3 +29,14 @@
 - 明确 OIDC、设备授权和客户端自助管理的支持范围；
 - 将令牌声明、过期策略和注销语义沉淀为可测试的兼容性契约；
 - 为高风险认证操作补齐审计与异常处置 Runbook。
+
+## 授权记录管理 API
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| `POST` | `/authorizations/conditions` | 分页查询，支持客户端、主体、授权类型和状态条件 |
+| `GET` | `/authorizations/{id}` | 查看授权记录详情 |
+| `DELETE` | `/authorizations/{id}` | 删除服务端授权并阻止 Refresh Token 继续使用 |
+| `DELETE` | `/authorizations/expired/cleanup` | 仅清理所有 Token、授权码和设备码均已过期的记录 |
+
+终止服务端授权不能撤回已经签发的自包含 JWT Access Token；它仍有效到 `exp`。清理操作带审计，管理端按钮和后端资源权限分别由 Organization 服务配置。
