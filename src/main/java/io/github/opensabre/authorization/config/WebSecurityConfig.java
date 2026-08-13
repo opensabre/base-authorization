@@ -61,6 +61,8 @@ public class WebSecurityConfig {
                         .permitAll()
                         .requestMatchers("/login/captcha/image")
                         .permitAll()
+                        .requestMatchers("/actuator/internalTokenKeyStatus")
+                        .permitAll()
                         .requestMatchers(
                                 "/authorizations", "/authorizations/**",
                                 "/authorization-consents", "/authorization-consents/**")
