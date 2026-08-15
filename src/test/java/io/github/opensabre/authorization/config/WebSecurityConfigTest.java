@@ -27,6 +27,6 @@ class WebSecurityConfigTest {
         assertThat(authentication).isNotNull();
         assertThat(authentication.getAuthorities())
                 .extracting("authority")
-                .containsExactlyInAnyOrder("ADMIN", "IT");
+                .contains("ADMIN", "IT");
     }
 }

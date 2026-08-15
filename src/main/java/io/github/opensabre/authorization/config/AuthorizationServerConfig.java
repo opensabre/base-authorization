@@ -18,13 +18,14 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.oidc.authentication.OidcUserInfoAuthenticationContext;
 import org.springframework.security.oauth2.server.authorization.oidc.authentication.OidcUserInfoAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
@@ -54,7 +55,12 @@ public class AuthorizationServerConfig {
                                                                       RegisteredClientRepository registeredClientRepository,
                                                                       AuthorizationServerSettings authorizationServerSettings) throws Exception {
         log.info("Init HttpSecurity for Oauth2");
-        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(httpSecurity);
+        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
+                new OAuth2AuthorizationServerConfigurer();
+        RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
+        httpSecurity
+                .securityMatcher(endpointsMatcher)
+                .with(authorizationServerConfigurer, Customizer.withDefaults());
         // 自定义用户映射器
         Function<OidcUserInfoAuthenticationContext, OidcUserInfo> userInfoMapper = (context) -> {
             OidcUserInfoAuthenticationToken authentication = context.getAuthentication();

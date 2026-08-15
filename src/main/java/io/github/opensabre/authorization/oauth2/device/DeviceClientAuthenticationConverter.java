@@ -12,7 +12,7 @@ import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.util.matcher.AndRequestMatcher;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 /**
@@ -27,7 +27,7 @@ public final class DeviceClientAuthenticationConverter implements Authentication
     public DeviceClientAuthenticationConverter(String deviceAuthorizationEndpointUri) {
         RequestMatcher clientIdParameterMatcher = request -> StringUtils.isNotBlank(request.getParameter(OAuth2ParameterNames.CLIENT_ID));
         this.deviceAuthorizationRequestMatcher = new AndRequestMatcher(
-                new AntPathRequestMatcher(deviceAuthorizationEndpointUri, HttpMethod.POST.name()), clientIdParameterMatcher);
+                PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, deviceAuthorizationEndpointUri), clientIdParameterMatcher);
         this.deviceAccessTokenRequestMatcher = request ->
                 AuthorizationGrantType.DEVICE_CODE.getValue().equals(request.getParameter(OAuth2ParameterNames.GRANT_TYPE)) &&
                         request.getParameter(OAuth2ParameterNames.DEVICE_CODE) != null ;

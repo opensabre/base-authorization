@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,7 +19,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 
 @Slf4j
@@ -79,7 +80,7 @@ public class WebSecurityConfig {
                 .userDetailsService(userDetailsService);
         // 管理台以 DELETE /logout 发起注销，成功后由处理器写入审计日志并返回 204。
         httpSecurity.logout(logout -> logout
-                .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "DELETE"))
+                .logoutRequestMatcher(PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.DELETE, "/logout"))
                 .logoutSuccessHandler(logoutAuditSuccessHandler));
         // 添加BearerTokenAuthenticationFilter，将认证服务当做一个资源服务，解析请求头中的token
         httpSecurity.oauth2ResourceServer((resourceServer) -> resourceServer

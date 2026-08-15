@@ -1,4 +1,18 @@
+server:
+  port: ${SERVER_PORT:8000}
 spring:
+  application:
+    name: base-authorization
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${REGISTER_HOST:localhost}:${REGISTER_PORT:8848}
+        ip: ${NACOS_DISCOVERY_IP:}
+      config:
+        server-addr: ${REGISTER_HOST:localhost}:${REGISTER_PORT:8848}
+        file-extension: yml
+  config:
+    import: optional:nacos:opensabre-common.yml?group=DEFAULT_GROUP&refreshEnabled=true
   data:
     redis:
       host: ${REDIS_HOST:localhost}

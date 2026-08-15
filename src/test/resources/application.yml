@@ -1,13 +1,22 @@
 spring:
+  application:
+    name: base-authorization
+  cloud:
+    nacos:
+      config:
+        enabled: false
+        import-check:
+          enabled: false
+      discovery:
+        enabled: false
+    loadbalancer:
+      retry:
+        enabled: true
   datasource:
     url: jdbc:h2:mem:os_base_auth;MODE=mysql;INIT=RUNSCRIPT FROM 'classpath:db/os-base-auth-ddl.sql'
     username: root
     password: root123
     driver-class-name: org.h2.Driver
-  cloud:
-    loadbalancer:
-      retry:
-        enabled: true
   flyway:
     locations: classpath:.
     baseline-on-migrate: true
