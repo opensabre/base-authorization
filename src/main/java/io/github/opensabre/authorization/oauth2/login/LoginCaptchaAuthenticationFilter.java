@@ -10,7 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -21,7 +22,8 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class LoginCaptchaAuthenticationFilter extends OncePerRequestFilter {
 
-    private final AntPathRequestMatcher loginRequestMatcher = new AntPathRequestMatcher("/login", HttpMethod.POST.name());
+    private final RequestMatcher loginRequestMatcher =
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/login");
     private final LoginSecurityService loginSecurityService;
     private final LoginSecurityProperties loginSecurityProperties;
     private final CaptchaProvider captchaProvider;

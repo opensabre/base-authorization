@@ -1,6 +1,6 @@
 package io.github.opensabre.authorization.oauth2.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.github.opensabre.authorization.exception.AuthErrorType;
 import io.github.opensabre.common.core.entity.vo.Result;
 import jakarta.servlet.http.HttpServletRequest;

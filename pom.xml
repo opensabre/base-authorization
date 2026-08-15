@@ -14,15 +14,14 @@
     <parent>
         <artifactId>opensabre-base-dependencies</artifactId>
         <groupId>io.github.opensabre</groupId>
-        <version>0.7.7</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!--  编译   -->
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>21</maven.compiler.release>
         <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
         <lombok.version>1.18.42</lombok.version>
         <!--  依赖   -->
@@ -54,10 +53,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

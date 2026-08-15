@@ -4,6 +4,7 @@ import com.alicp.jetcache.Cache;
 import com.alicp.jetcache.CacheManager;
 import com.alicp.jetcache.anno.CacheType;
 import com.alicp.jetcache.template.QuickConfig;
+import com.alicp.jetcache.support.DecodeFilter;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import jakarta.annotation.PostConstruct;
@@ -32,6 +33,7 @@ public class JWKCacheManager {
 
     @PostConstruct
     public void init() {
+        DecodeFilter.getDefault().addAllowPatterns("com.nimbusds.");
         QuickConfig qc = QuickConfig.newBuilder("remote_")
                 .expire(Duration.ofDays(36500L)) // 100年过期时间
                 .cacheType(CacheType.BOTH) // two level cache
