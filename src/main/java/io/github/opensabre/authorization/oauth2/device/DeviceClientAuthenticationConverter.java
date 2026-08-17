@@ -41,7 +41,7 @@ public final class DeviceClientAuthenticationConverter implements Authentication
         }
         // client_id (REQUIRED)
         String clientId = request.getParameter(OAuth2ParameterNames.CLIENT_ID);
-        if (StringUtils.isNotBlank(clientId) || request.getParameterValues(OAuth2ParameterNames.CLIENT_ID).length != 1) {
+        if (StringUtils.isBlank(clientId) || request.getParameterValues(OAuth2ParameterNames.CLIENT_ID).length != 1) {
             throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_REQUEST);
         }
         return new DeviceClientAuthenticationToken(clientId, ClientAuthenticationMethod.NONE, null, null);
