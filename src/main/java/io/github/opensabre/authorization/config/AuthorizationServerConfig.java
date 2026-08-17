@@ -60,6 +60,10 @@ public class AuthorizationServerConfig {
         RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
         httpSecurity
                 .securityMatcher(endpointsMatcher)
+                // Require a logged-in resource owner before the authorization endpoint
+                // processes the request; otherwise anonymous requests become
+                // `invalid_request: principal` callbacks instead of login redirects.
+                .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
                 .with(authorizationServerConfigurer, Customizer.withDefaults());
         // 自定义用户映射器
         Function<OidcUserInfoAuthenticationContext, OidcUserInfo> userInfoMapper = (context) -> {
