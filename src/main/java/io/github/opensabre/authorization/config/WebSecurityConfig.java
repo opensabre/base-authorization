@@ -10,6 +10,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -86,6 +89,28 @@ public class WebSecurityConfig {
         httpSecurity.oauth2ResourceServer((resourceServer) -> resourceServer
                 .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
         return httpSecurity.build();
+    }
+
+    /**
+     * 配置 DaoAuthenticationProvider 用于用户名密码认证
+     *
+     * @return DaoAuthenticationProvider
+     */
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        return new DaoAuthenticationProvider(userDetailsService);
+    }
+
+    /**
+     * 配置 AuthenticationManager
+     *
+     * @param authenticationConfiguration 认证配置
+     * @return AuthenticationManager
+     * @throws Exception 配置异常
+     */
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     /**
