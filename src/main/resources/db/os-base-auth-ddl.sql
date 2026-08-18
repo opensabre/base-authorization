@@ -56,7 +56,7 @@ CREATE TABLE oauth2_registered_client
 (
     id                            varchar(100)  NOT NULL COMMENT 'UUID生成',
     client_id                     varchar(100)  NOT NULL COMMENT 'client_id',
-    client_id_issued_at           datetime      NOT NULL DEFAULT now() COMMENT 'client生成时间',
+    client_id_issued_at           datetime      NOT NULL DEFAULT now(3) COMMENT 'client生成时间',
     client_secret                 varchar(200)           DEFAULT NULL COMMENT 'client密码',
     client_secret_expires_at      datetime               DEFAULT NULL COMMENT 'client密码过期时间',
     client_name                   varchar(200)  NOT NULL COMMENT 'client名称',
@@ -68,8 +68,8 @@ CREATE TABLE oauth2_registered_client
     client_settings               text          NOT NULL COMMENT 'client设置如：过期时间',
     token_settings                text          NOT NULL COMMENT 'token设置如：过期时间、类型等',
     deleted                       varchar(1)    NOT NULL DEFAULT 'N' COMMENT '是否已删除Y：已删除，N：未删除',
-    created_time                  datetime      NOT NULL DEFAULT now() COMMENT '创建时间',
-    updated_time                  datetime      NOT NULL DEFAULT now() COMMENT '更新时间',
+    created_time                  datetime(3)   NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+    updated_time                  datetime(3)   NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
     created_by                    varchar(100)  NOT NULL COMMENT '创建人',
     updated_by                    varchar(100)  NOT NULL COMMENT '更新人',
     PRIMARY KEY (id)
