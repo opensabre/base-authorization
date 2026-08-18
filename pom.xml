@@ -5,7 +5,7 @@
 
     <groupId>com.springboot.cloud</groupId>
     <artifactId>base-authorization</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
 
     <name>base-authorization</name>
@@ -14,7 +14,7 @@
     <parent>
         <artifactId>opensabre-base-dependencies</artifactId>
         <groupId>io.github.opensabre</groupId>
-        <version>1.0.0</version>
+        <version>1.1.0</version>
     </parent>
 
     <properties>
@@ -24,6 +24,7 @@
         <maven.compiler.release>21</maven.compiler.release>
         <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
         <lombok.version>1.18.42</lombok.version>
+        <native-build-tools-plugin.version>0.10.6</native-build-tools-plugin.version>
         <!--  依赖   -->
         <bootstrap.version>5.3.3</bootstrap.version>
     </properties>
@@ -142,15 +143,12 @@
         <profile>
             <id>native</id>
             <properties>
-                <repackage.classifier>exec</repackage.classifier>
-                <native-buildtools.version>0.9.16</native-buildtools.version>
-                <spring-native.version>0.12.2</spring-native.version>
+                <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
             </properties>
             <dependencies>
                 <dependency>
-                    <groupId>org.springframework.experimental</groupId>
-                    <artifactId>spring-native</artifactId>
-                    <version>${spring-native.version}</version>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>log4j-over-slf4j</artifactId>
                 </dependency>
             </dependencies>
             <build>
@@ -158,40 +156,22 @@
                     <plugin>
                         <groupId>org.graalvm.buildtools</groupId>
                         <artifactId>native-maven-plugin</artifactId>
-                        <version>${native-buildtools.version}</version>
+                        <version>${native-build-tools-plugin.version}</version>
                         <extensions>true</extensions>
+                        <configuration>
+                            <imageName>${project.artifactId}</imageName>
+                            <mainClass>io.github.opensabre.authorization.Oauth2AuthorizationApplication</mainClass>
+                            <buildArgs>
+                                <buildArg>--no-fallback</buildArg>
+                            </buildArgs>
+                            <skipNativeTests>true</skipNativeTests>
+                        </configuration>
                         <executions>
-                            <execution>
-                                <id>test-native</id>
-                                <phase>test</phase>
-                                <goals>
-                                    <goal>test</goal>
-                                </goals>
-                            </execution>
                             <execution>
                                 <id>build-native</id>
                                 <phase>package</phase>
                                 <goals>
-                                    <goal>build</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.springframework.experimental</groupId>
-                        <artifactId>spring-aot-maven-plugin</artifactId>
-                        <version>${spring-native.version}</version>
-                        <executions>
-                            <execution>
-                                <id>test-generate</id>
-                                <goals>
-                                    <goal>test-generate</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>generate</id>
-                                <goals>
-                                    <goal>generate</goal>
+                                    <goal>compile-no-fork</goal>
                                 </goals>
                             </execution>
                         </executions>
