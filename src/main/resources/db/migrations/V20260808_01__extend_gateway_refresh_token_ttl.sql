@@ -5,7 +5,7 @@ SET token_settings = JSON_SET(
         '$."settings.token.refresh-token-time-to-live"',
         2592000
     ),
-    updated_time = CURRENT_TIMESTAMP,
+    updated_time = CURRENT_TIMESTAMP(3),
     updated_by = 'migration'
 WHERE client_id IN ('base-gateway', 'base-gateway-local', 'test_client1')
   AND (
