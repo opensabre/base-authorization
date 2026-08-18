@@ -157,6 +157,7 @@
                             <mainClass>io.github.opensabre.authorization.Oauth2AuthorizationApplication</mainClass>
                             <buildArgs>
                                 <buildArg>--no-fallback</buildArg>
+                                <buildArg>-Ob</buildArg>
                             </buildArgs>
                             <skipNativeTests>true</skipNativeTests>
                         </configuration>
