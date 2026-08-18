@@ -145,12 +145,6 @@
             <properties>
                 <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
             </properties>
-            <dependencies>
-                <dependency>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>log4j-over-slf4j</artifactId>
-                </dependency>
-            </dependencies>
             <build>
                 <plugins>
                     <plugin>
@@ -163,7 +157,6 @@
                             <mainClass>io.github.opensabre.authorization.Oauth2AuthorizationApplication</mainClass>
                             <buildArgs>
                                 <buildArg>--no-fallback</buildArg>
-                                <buildArg>--trace-class-initialization=org.slf4j.LoggerFactory</buildArg>
                             </buildArgs>
                             <skipNativeTests>true</skipNativeTests>
                         </configuration>
