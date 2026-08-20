@@ -1,8 +1,0 @@
-FROM gcr.io/distroless/base-debian12:nonroot
-
-ARG BINARY
-WORKDIR /app
-COPY --chown=nonroot:nonroot target/${BINARY} /app/application
-
-USER nonroot:nonroot
-ENTRYPOINT ["/app/application"]

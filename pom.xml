@@ -24,7 +24,6 @@
         <maven.compiler.release>21</maven.compiler.release>
         <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
         <lombok.version>1.18.42</lombok.version>
-        <native-build-tools-plugin.version>0.10.6</native-build-tools-plugin.version>
         <!--  依赖   -->
         <bootstrap.version>5.3.3</bootstrap.version>
     </properties>
@@ -138,41 +137,5 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>native</id>
-            <properties>
-                <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.graalvm.buildtools</groupId>
-                        <artifactId>native-maven-plugin</artifactId>
-                        <version>${native-build-tools-plugin.version}</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <imageName>${project.artifactId}</imageName>
-                            <mainClass>io.github.opensabre.authorization.Oauth2AuthorizationApplication</mainClass>
-                            <buildArgs>
-                                <buildArg>--no-fallback</buildArg>
-                            </buildArgs>
-                            <skipNativeTests>true</skipNativeTests>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>build-native</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>compile-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
 </project>
