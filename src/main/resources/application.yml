@@ -12,7 +12,7 @@ spring:
         server-addr: ${REGISTER_HOST:localhost}:${REGISTER_PORT:8848}
         file-extension: yml
   config:
-    import: optional:nacos:opensabre-common.yml?group=DEFAULT_GROUP&refreshEnabled=true
+    import: optional:nacos:${OPENSABRE_COMMON_CONFIG_DATA_ID:opensabre-common.yml}?group=${OPENSABRE_COMMON_CONFIG_GROUP:DEFAULT_GROUP}&refreshEnabled=true
   data:
     redis:
       host: ${REDIS_HOST:localhost}
