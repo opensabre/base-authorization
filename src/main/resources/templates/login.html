@@ -56,6 +56,9 @@
                         <img id="captchaImage" alt="图形验证码">
                     </button>
                 </div>
+                <div th:if="${captchaRequired}" id="captchaError" class="text-danger small" role="alert" hidden>
+                    验证码服务暂不可用，请稍后重试。
+                </div>
             </div>
 
             <button class="btn btn-primary btn-signin" type="submit">登录</button>
@@ -80,6 +83,7 @@
         const captchaIdInput = document.getElementById('captchaId');
         const captchaImage = document.getElementById('captchaImage');
         const refreshButton = document.getElementById('refreshCaptcha');
+        const captchaError = document.getElementById('captchaError');
 
         function loadCaptcha() {
             fetch('/login/captcha/image', {method: 'POST'})
@@ -97,10 +101,12 @@
                     } else {
                         captchaImage.removeAttribute('src');
                     }
+                    captchaError.hidden = Boolean(captcha.captchaId && captcha.imageData);
                 })
                 .catch(function () {
                     captchaIdInput.value = '';
                     captchaImage.removeAttribute('src');
+                    captchaError.hidden = false;
                 });
         }
 

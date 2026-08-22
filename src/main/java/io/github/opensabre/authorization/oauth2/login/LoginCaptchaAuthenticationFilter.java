@@ -1,6 +1,7 @@
 package io.github.opensabre.authorization.oauth2.login;
 
 import io.github.opensabre.authorization.provider.CaptchaProvider;
+import io.github.opensabre.authorization.exception.AuthErrorType;
 import io.github.opensabre.common.core.entity.vo.Result;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -44,17 +45,24 @@ public class LoginCaptchaAuthenticationFilter extends OncePerRequestFilter {
 
         String captchaId = request.getParameter("captchaId");
         String captchaCode = request.getParameter("captchaCode");
-        if (StringUtils.isAnyBlank(captchaId, captchaCode) || !verifyCaptcha(captchaId, captchaCode)) {
+        Result<Boolean> verification = verifyCaptcha(captchaId, captchaCode);
+        if (StringUtils.isAnyBlank(captchaId, captchaCode) || verification == null
+                || !verification.isSuccess() || !Boolean.TRUE.equals(verification.getData())) {
             log.warn("Login captcha verification failed: username={}", username);
-            response.sendRedirect(LoginRedirects.failureUrl(request, username, "captcha"));
+            String error = verification != null
+                    && AuthErrorType.CAPTCHA_SERVICE_UNAVAILABLE.getCode().equals(verification.getCode())
+                    ? "captcha-service-unavailable" : "captcha";
+            response.sendRedirect(LoginRedirects.failureUrl(request, username, error));
             return;
         }
 
         filterChain.doFilter(request, response);
     }
 
-    private boolean verifyCaptcha(String captchaId, String captchaCode) {
-        Result<Boolean> result = captchaProvider.verifyCaptcha(loginSecurityProperties.getCaptchaScenario(), captchaId, captchaCode);
-        return result != null && Boolean.TRUE.equals(result.getData());
+    private Result<Boolean> verifyCaptcha(String captchaId, String captchaCode) {
+        if (StringUtils.isAnyBlank(captchaId, captchaCode)) {
+            return null;
+        }
+        return captchaProvider.verifyCaptcha(loginSecurityProperties.getCaptchaScenario(), captchaId, captchaCode);
     }
 }
