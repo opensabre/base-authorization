@@ -28,4 +28,11 @@ public class GlobalExceptionHandlerAdvice {
         log.error("On Authentication Failure :{}", ex.getMessage());
         return Result.fail(AuthErrorType.INVALID_CLIENT);
     }
+
+    @ExceptionHandler(CaptchaServiceUnavailableException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public Result<?> captchaServiceUnavailable(CaptchaServiceUnavailableException ex) {
+        log.error("Captcha service unavailable", ex);
+        return Result.fail(AuthErrorType.CAPTCHA_SERVICE_UNAVAILABLE);
+    }
 }
