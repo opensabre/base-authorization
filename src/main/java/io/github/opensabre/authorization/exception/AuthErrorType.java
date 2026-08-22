@@ -18,6 +18,7 @@ public enum AuthErrorType implements ErrorType {
     SERVER_ERROR("040050", "权限服务错误"),
     UNAUTHORIZED_CLIENT("040060", "未授权客户端"),
     UNAUTHORIZED("040061", "未授权"),
+    CAPTCHA_SERVICE_UNAVAILABLE("040080", "验证码服务暂不可用，请稍后重试"),
     UNSUPPORTED_RESPONSE_TYPE("040070", " 支持的响应类型"),
     UNSUPPORTED_GRANT_TYPE("040071", "不支持的授权类型");
 
