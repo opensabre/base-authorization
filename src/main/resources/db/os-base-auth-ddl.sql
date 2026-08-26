@@ -56,7 +56,7 @@ CREATE TABLE oauth2_registered_client
 (
     id                            varchar(100)  NOT NULL COMMENT 'UUID生成',
     client_id                     varchar(100)  NOT NULL COMMENT 'client_id',
-    client_id_issued_at           datetime      NOT NULL DEFAULT now(3) COMMENT 'client生成时间',
+    client_id_issued_at           datetime(3)   NOT NULL DEFAULT now(3) COMMENT 'client生成时间',
     client_secret                 varchar(200)           DEFAULT NULL COMMENT 'client密码',
     client_secret_expires_at      datetime               DEFAULT NULL COMMENT 'client密码过期时间',
     client_name                   varchar(200)  NOT NULL COMMENT 'client名称',
