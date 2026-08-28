@@ -5,6 +5,7 @@ import io.github.opensabre.authorization.oauth2.login.LoginAuthenticationFailure
 import io.github.opensabre.authorization.oauth2.login.LoginAuthenticationSuccessHandler;
 import io.github.opensabre.authorization.oauth2.login.LoginCaptchaAuthenticationFilter;
 import io.github.opensabre.authorization.oauth2.login.LogoutAuditSuccessHandler;
+import io.github.opensabre.authorization.oauth2.login.GatewaySessionLogoutHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,6 +41,8 @@ public class WebSecurityConfig {
     private LoginAuthenticationFailureHandler loginAuthenticationFailureHandler;
     @Resource
     private LogoutAuditSuccessHandler logoutAuditSuccessHandler;
+    @Resource
+    private GatewaySessionLogoutHandler gatewaySessionLogoutHandler;
 
     /**
      * 用于身份验证的 Spring Security 过滤器链
@@ -84,6 +87,11 @@ public class WebSecurityConfig {
         // 管理台以 DELETE /logout 发起注销，成功后由处理器写入审计日志并返回 204。
         httpSecurity.logout(logout -> logout
                 .logoutRequestMatcher(PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.DELETE, "/logout"))
+                // 认证服务负责完整注销：失效 HttpSession、清理 SecurityContext 并移除会话 Cookie。
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
+                .deleteCookies("JSESSIONID")
+                .addLogoutHandler(gatewaySessionLogoutHandler)
                 .logoutSuccessHandler(logoutAuditSuccessHandler));
         // 添加BearerTokenAuthenticationFilter，将认证服务当做一个资源服务，解析请求头中的token
         httpSecurity.oauth2ResourceServer((resourceServer) -> resourceServer
