@@ -78,6 +78,8 @@ logging:
     org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: trace
     org.springframework.security.web.FilterChainProxy: trace # 过滤器执行顺序
     org.springframework.security.web.access.ExceptionTranslationFilter: trace #异常处理
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-},%X{parentSpanId:-}]'
 
 mybatis-plus:
   global-config:
