@@ -76,11 +76,50 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build and Push with Jib
+      - name: Resolve image tags
+        id: image
+        shell: bash
+        run: |
+          set -euo pipefail
+          image_name="${REGISTRY_URL}/${GITHUB_REPOSITORY#*/}"
+          short_sha="${GITHUB_SHA:0:7}"
+          sha_tag="sha-${short_sha}"
+
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            version="${GITHUB_REF_NAME#v}"
+            if [[ ! "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z][0-9A-Za-z.-]*)?$ ]]; then
+              echo "Release tag must use SemVer, for example v1.2.3 or v1.2.3-rc.1" >&2
+              exit 1
+            fi
+
+            project_version="$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+            if [[ "${project_version}" != "${version}" ]]; then
+              echo "Git tag version ${version} does not match pom.xml version ${project_version}" >&2
+              exit 1
+            fi
+
+            target_tag="${version}"
+            if [[ "${version}" == *-* ]]; then
+              additional_tags="${sha_tag}"
+            else
+              major_minor="${version%.*}"
+              additional_tags="${major_minor},latest,${sha_tag}"
+            fi
+          else
+            target_tag="main"
+            additional_tags="${sha_tag}"
+          fi
+
+          echo "target_image=${image_name}:${target_tag}" >> "${GITHUB_OUTPUT}"
+          echo "additional_tags=${additional_tags}" >> "${GITHUB_OUTPUT}"
+
+      - name: Build and push with Jib
         run: >-
           mvn --batch-mode --no-transfer-progress
           -DskipTests
           compile
           jib:build
+          -Djib.to.image=${{ steps.image.outputs.target_image }}
+          -Djib.to.tags=${{ steps.image.outputs.additional_tags }}
           -Dsecret.id=${{ secrets.DOCKER_CLOUD_SECRET_ID }}
           -Dsecret.key=${{ secrets.DOCKER_CLOUD_SECRET_KEY }}
