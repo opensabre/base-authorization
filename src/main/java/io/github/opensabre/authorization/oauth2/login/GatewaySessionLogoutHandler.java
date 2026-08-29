@@ -3,6 +3,7 @@ package io.github.opensabre.authorization.oauth2.login;
 import io.github.opensabre.authorization.online.OnlineUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,14 +20,35 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class GatewaySessionLogoutHandler implements LogoutHandler {
 
+    private static final String GATEWAY_SESSION_COOKIE = "SESSION";
+
     private final OnlineUserService onlineUserService;
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        String sessionId = request.getRequestedSessionId();
+        // The gateway uses Spring Session's SESSION cookie while this servlet
+        // application may expose its own JSESSIONID. Prefer the forwarded
+        // gateway cookie so the OAuth2 client context is actually removed.
+        String sessionId = gatewaySessionId(request);
+        if (!StringUtils.hasText(sessionId)) {
+            sessionId = request.getRequestedSessionId();
+        }
         if (StringUtils.hasText(sessionId)) {
             onlineUserService.kickout(sessionId);
         }
         SecurityContextHolder.clearContext();
+    }
+
+    private String gatewaySessionId(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+        for (Cookie cookie : cookies) {
+            if (GATEWAY_SESSION_COOKIE.equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
     }
 }
