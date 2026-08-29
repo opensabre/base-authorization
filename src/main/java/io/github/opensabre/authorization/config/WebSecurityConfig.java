@@ -90,7 +90,9 @@ public class WebSecurityConfig {
                 // 认证服务负责完整注销：失效 HttpSession、清理 SecurityContext 并移除会话 Cookie。
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
-                .deleteCookies("JSESSIONID")
+                // 同时清除网关 OAuth2 登录使用的共享 Session Cookie；认证服务的
+                // GatewaySessionLogoutHandler 负责异步删除对应 Redis 会话。
+                .deleteCookies("JSESSIONID", "SESSION")
                 .addLogoutHandler(gatewaySessionLogoutHandler)
                 .logoutSuccessHandler(logoutAuditSuccessHandler));
         // 添加BearerTokenAuthenticationFilter，将认证服务当做一个资源服务，解析请求头中的token
