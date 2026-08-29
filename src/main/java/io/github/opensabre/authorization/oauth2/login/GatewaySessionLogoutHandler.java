@@ -10,6 +10,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 注销认证服务会话时，同步删除共享 Redis 中的 gateway 会话。
@@ -18,7 +22,10 @@ import org.springframework.util.StringUtils;
  */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class GatewaySessionLogoutHandler implements LogoutHandler {
+
+    private static final long GATEWAY_SESSION_CLEANUP_DELAY_MILLIS = 250;
 
     private static final String GATEWAY_SESSION_COOKIE = "SESSION";
 
@@ -34,7 +41,18 @@ public class GatewaySessionLogoutHandler implements LogoutHandler {
             sessionId = request.getRequestedSessionId();
         }
         if (StringUtils.hasText(sessionId)) {
-            onlineUserService.kickout(sessionId);
+            String sessionToRemove = sessionId;
+            // The request is still being finalized by the reactive gateway. Deleting its
+            // shared WebSession synchronously makes the gateway attempt to save an invalidated
+            // session and return 500. Delay only the cross-service cleanup until the response
+            // has left the request chain; Auth's own HttpSession is still invalidated normally.
+            CompletableFuture.runAsync(
+                    () -> onlineUserService.kickout(sessionToRemove),
+                    CompletableFuture.delayedExecutor(GATEWAY_SESSION_CLEANUP_DELAY_MILLIS, TimeUnit.MILLISECONDS))
+                    .exceptionally(ex -> {
+                        log.warn("failed to clear shared gateway session {}", sessionToRemove, ex);
+                        return null;
+                    });
         }
         SecurityContextHolder.clearContext();
     }

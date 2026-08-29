@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,7 +23,7 @@ class GatewaySessionLogoutHandlerTest {
 
         handler.logout(request, mock(HttpServletResponse.class), null);
 
-        verify(onlineUserService).kickout("session-1");
+        verify(onlineUserService, timeout(1000)).kickout("session-1");
         SecurityContextHolder.clearContext();
     }
 
@@ -39,7 +40,7 @@ class GatewaySessionLogoutHandlerTest {
 
         handler.logout(request, mock(HttpServletResponse.class), null);
 
-        verify(onlineUserService).kickout("gateway-session");
+        verify(onlineUserService, timeout(1000)).kickout("gateway-session");
         SecurityContextHolder.clearContext();
     }
 }
