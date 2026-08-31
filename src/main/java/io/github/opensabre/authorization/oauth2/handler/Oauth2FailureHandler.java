@@ -15,11 +15,14 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -29,11 +32,13 @@ public class Oauth2FailureHandler implements AuthenticationFailureHandler {
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception)
             throws IOException {
         log.warn("authentication error:", exception);
+        if (exception instanceof OAuth2AuthenticationException oauth2Exception) {
+            writeOauth2Error(response, oauth2Exception.getError());
+            return;
+        }
+
         String message;
-        if (exception instanceof OAuth2AuthenticationException auth2AuthenticationException) {
-            OAuth2Error error = auth2AuthenticationException.getError();
-            message = "认证信息错误: " + error.getErrorCode() + ", " + error.getDescription();
-        } else if (exception instanceof BadCredentialsException) {
+        if (exception instanceof BadCredentialsException) {
             message = "账户或密码错误!";
         } else if (exception instanceof LockedException) {
             message = "账户被锁定，请联系管理员!";
@@ -49,6 +54,32 @@ public class Oauth2FailureHandler implements AuthenticationFailureHandler {
         response.setContentType(MediaType.APPLICATION_JSON.toString());
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.getWriter().write(new ObjectMapper().writeValueAsString(Result.fail(AuthErrorType.UNAUTHORIZED, message)));
+        response.getWriter().flush();
+    }
+
+    /**
+     * OAuth2 token clients require the RFC error fields in order to preserve errors such as
+     * {@code invalid_grant}. Wrapping these errors in the platform Result envelope makes Spring
+     * Security downgrade the response to {@code server_error}.
+     */
+    private void writeOauth2Error(HttpServletResponse response, OAuth2Error error) throws IOException {
+        Map<String, String> body = new LinkedHashMap<>();
+        body.put("error", error.getErrorCode());
+        if (error.getDescription() != null) {
+            body.put("error_description", error.getDescription());
+        }
+        if (error.getUri() != null) {
+            body.put("error_uri", error.getUri());
+        }
+
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setContentType(MediaType.APPLICATION_JSON.toString());
+        response.setHeader("Cache-Control", "no-store");
+        response.setHeader("Pragma", "no-cache");
+        response.setStatus(OAuth2ErrorCodes.INVALID_CLIENT.equals(error.getErrorCode())
+                ? HttpStatus.UNAUTHORIZED.value()
+                : HttpStatus.BAD_REQUEST.value());
+        response.getWriter().write(new ObjectMapper().writeValueAsString(body));
         response.getWriter().flush();
     }
 }
