@@ -70,6 +70,13 @@ public class WebSecurityConfig {
                         .permitAll()
                         .requestMatchers("/actuator/internalTokenKeyStatus")
                         .permitAll()
+                        // The control plane reads only the basic metrics displayed in service management.
+                        .requestMatchers("/actuator/metrics/process.cpu.usage",
+                                "/actuator/metrics/jvm.memory.used",
+                                "/actuator/metrics/jvm.memory.max",
+                                "/actuator/metrics/process.uptime",
+                                "/actuator/metrics/jvm.threads.live")
+                        .permitAll()
                         .requestMatchers(
                                 "/authorizations", "/authorizations/**",
                                 "/authorization-consents", "/authorization-consents/**")
