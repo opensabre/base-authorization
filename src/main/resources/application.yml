@@ -1,6 +1,9 @@
 server:
   port: ${SERVER_PORT:8000}
 spring:
+  # Database changes are executed by the dedicated release migration process, never by app pods.
+  flyway:
+    enabled: false
   application:
     name: base-authorization
   cloud:

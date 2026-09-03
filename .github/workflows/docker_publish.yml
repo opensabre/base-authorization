@@ -36,12 +36,21 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v7.0.1
 
+      - name: Checkout OpenSabre Framework
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: opensabre/opensabre-framework
+          path: opensabre-framework
+
       - name: Set up JDK
         uses: actions/setup-java@v5.6.0
         with:
           java-version: '25'
           distribution: 'temurin'
           cache: maven
+
+      - name: Install OpenSabre Framework Snapshot
+        run: mvn --batch-mode --no-transfer-progress -f opensabre-framework/pom.xml -DskipTests install
 
       - name: Run Tests
         run: mvn --batch-mode --no-transfer-progress verify
@@ -69,12 +78,21 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v7.0.1
 
+      - name: Checkout OpenSabre Framework
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: opensabre/opensabre-framework
+          path: opensabre-framework
+
       - name: Set up JDK
         uses: actions/setup-java@v5.6.0
         with:
           java-version: '25'
           distribution: 'temurin'
           cache: maven
+
+      - name: Install OpenSabre Framework Snapshot
+        run: mvn --batch-mode --no-transfer-progress -f opensabre-framework/pom.xml -DskipTests install
 
       - name: Resolve image tags
         id: image

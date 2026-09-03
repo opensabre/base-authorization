@@ -14,7 +14,7 @@
     <parent>
         <artifactId>opensabre-base-dependencies</artifactId>
         <groupId>io.github.opensabre</groupId>
-        <version>1.1.2</version>
+        <version>1.1.3-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -33,6 +33,10 @@
         <dependency>
             <groupId>io.github.opensabre</groupId>
             <artifactId>opensabre-starter-persistence</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.opensabre</groupId>
+            <artifactId>opensabre-starter-migration</artifactId>
         </dependency>
         <dependency>
             <groupId>io.github.opensabre</groupId>
