@@ -5,7 +5,7 @@
 
     <groupId>com.springboot.cloud</groupId>
     <artifactId>base-authorization</artifactId>
-    <version>1.1.2</version>
+    <version>1.1.3</version>
     <packaging>jar</packaging>
 
     <name>base-authorization</name>
@@ -14,7 +14,7 @@
     <parent>
         <artifactId>opensabre-base-dependencies</artifactId>
         <groupId>io.github.opensabre</groupId>
-        <version>1.1.3-SNAPSHOT</version>
+        <version>1.1.3</version>
     </parent>
 
     <properties>
