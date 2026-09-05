@@ -15,6 +15,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  database-migrations:
+    name: Flyway MySQL
+    uses: opensabre/base-k8s/.github/workflows/service-database-migrations.yml@main
+    with:
+      repository: ${{ github.repository }}
+      ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      service: base-authorization
+
   test:
     name: Maven Verify
     runs-on: ubuntu-latest
