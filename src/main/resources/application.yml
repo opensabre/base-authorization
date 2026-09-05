@@ -46,7 +46,7 @@ opensabre:
   online-user:
     session-namespace: ${SPRING_SESSION_REDIS_NAMESPACE:opensabre:gateway:session}
   oauth2:
-    issuer-uri: http://www.opensabre.cloud:8000
+    issuer-uri: ${AUTH_ISSUER_URI:http://www.opensabre.cloud:8000}
     authorization:
       cleanup:
         enabled: ${OAUTH2_AUTHORIZATION_CLEANUP_ENABLED:false}
