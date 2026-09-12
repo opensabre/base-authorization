@@ -1,5 +1,7 @@
 package io.github.opensabre.authorization.config;
 
+import io.github.opensabre.security.actuator.ActuatorMonitoringAccess;
+import io.github.opensabre.security.webmvc.InternalTokenAuthenticationFilter;
 import jakarta.annotation.Resource;
 import io.github.opensabre.authorization.oauth2.login.LoginAuthenticationFailureHandler;
 import io.github.opensabre.authorization.oauth2.login.LoginAuthenticationSuccessHandler;
@@ -21,6 +23,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
@@ -55,7 +58,8 @@ public class WebSecurityConfig {
     @Order(2)
     public SecurityFilterChain defaultSecurityFilterChain(
             HttpSecurity httpSecurity,
-            JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
+            JwtAuthenticationConverter jwtAuthenticationConverter,
+            InternalTokenAuthenticationFilter internalTokenAuthenticationFilter) throws Exception {
         log.info("Init HttpSecurity for Security");
         // web站点基本安全配置
         httpSecurity
@@ -70,13 +74,8 @@ public class WebSecurityConfig {
                         .permitAll()
                         .requestMatchers("/actuator/internalTokenKeyStatus")
                         .permitAll()
-                        // The control plane reads only the basic metrics displayed in service management.
-                        .requestMatchers("/actuator/metrics/process.cpu.usage",
-                                "/actuator/metrics/jvm.memory.used",
-                                "/actuator/metrics/jvm.memory.max",
-                                "/actuator/metrics/process.uptime",
-                                "/actuator/metrics/jvm.threads.live")
-                        .permitAll()
+                        .requestMatchers(ActuatorMonitoringAccess.metricPathArray())
+                        .hasAuthority(ActuatorMonitoringAccess.AUTHORITY)
                         .requestMatchers(
                                 "/authorizations", "/authorizations/**",
                                 "/authorization-consents", "/authorization-consents/**")
@@ -89,6 +88,8 @@ public class WebSecurityConfig {
                         .loginPage("/login")
                         .successHandler(loginAuthenticationSuccessHandler)
                 .failureHandler(loginAuthenticationFailureHandler))
+                .addFilterBefore(internalTokenAuthenticationFilter,
+                        BearerTokenAuthenticationFilter.class)
                 .addFilterBefore(loginCaptchaAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .userDetailsService(userDetailsService);
         // 管理台以 DELETE /logout 发起注销，成功后由处理器写入审计日志并返回 204。

@@ -37,3 +37,13 @@ mybatis-plus:
       logic-delete-value: "Y" # 逻辑已删除值(默认为 Y)
       logic-not-delete-value: "N" # 逻辑未删除值(默认为 N)
       table-prefix: base_auth_
+
+# 上下文测试使用 JetCache 自带内存远程缓存，避免依赖外部 Redis。
+jetcache:
+  remote:
+    default:
+      type: mock
+    longTime:
+      type: mock
+    shortTime:
+      type: mock
