@@ -74,6 +74,10 @@ public class WebSecurityConfig {
                         .permitAll()
                         .requestMatchers("/actuator/internalTokenKeyStatus")
                         .permitAll()
+                        // The management port is private to the deployment network. Only the
+                        // aggregate scrape endpoint is exposed to Prometheus without a user token.
+                        .requestMatchers("/actuator/prometheus")
+                        .permitAll()
                         .requestMatchers(ActuatorMonitoringAccess.metricPathArray())
                         .hasAuthority(ActuatorMonitoringAccess.AUTHORITY)
                         .requestMatchers(
