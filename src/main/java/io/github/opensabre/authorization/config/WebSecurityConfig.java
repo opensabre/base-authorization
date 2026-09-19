@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -25,8 +26,11 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+
+import java.util.stream.Stream;
 
 
 @Slf4j
@@ -73,13 +77,11 @@ public class WebSecurityConfig {
                         .requestMatchers("/login/captcha/image")
                         .permitAll()
                         .requestMatchers("/actuator/internalTokenKeyStatus")
-                        .permitAll()
-                        // The management port is private to the deployment network. Only the
-                        // aggregate scrape endpoint is exposed to Prometheus without a user token.
-                        .requestMatchers("/actuator/prometheus")
-                        .permitAll()
+                        .hasAuthority(ActuatorMonitoringAccess.AUTHORITY)
                         .requestMatchers(ActuatorMonitoringAccess.metricPathArray())
                         .hasAuthority(ActuatorMonitoringAccess.AUTHORITY)
+                        .requestMatchers("/actuator/**")
+                        .hasAuthority("SCOPE_actuator.read")
                         .requestMatchers(
                                 "/authorizations", "/authorizations/**",
                                 "/authorization-consents", "/authorization-consents/**")
@@ -96,6 +98,9 @@ public class WebSecurityConfig {
                         BearerTokenAuthenticationFilter.class)
                 .addFilterBefore(loginCaptchaAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .userDetailsService(userDetailsService);
+        httpSecurity.exceptionHandling(exceptions -> exceptions.defaultAuthenticationEntryPointFor(
+                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                PathPatternRequestMatcher.withDefaults().matcher("/actuator/**")));
         // 管理台以 DELETE /logout 发起注销，成功后由处理器写入审计日志并返回 204。
         httpSecurity.logout(logout -> logout
                 .logoutRequestMatcher(PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.DELETE, "/logout"))
@@ -145,8 +150,13 @@ public class WebSecurityConfig {
         JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
         authoritiesConverter.setAuthoritiesClaimName("roles");
         authoritiesConverter.setAuthorityPrefix("");
+        JwtGrantedAuthoritiesConverter scopeAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
         JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
-        authenticationConverter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
+        authenticationConverter.setJwtGrantedAuthoritiesConverter(jwt ->
+                Stream.concat(authoritiesConverter.convert(jwt).stream(),
+                        scopeAuthoritiesConverter.convert(jwt).stream())
+                        .distinct()
+                        .toList());
         return authenticationConverter;
     }
 }

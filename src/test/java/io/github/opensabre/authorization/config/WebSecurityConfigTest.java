@@ -48,6 +48,27 @@ class WebSecurityConfigTest {
     }
 
     @Test
+    void shouldRestoreActuatorScopeWithoutGrantingApplicationRoles() {
+        Jwt jwt = Jwt.withTokenValue("token")
+                .header("alg", "none")
+                .subject("opensabre-prometheus")
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(60))
+                .claim("scope", "actuator.read")
+                .build();
+
+        var authentication = new WebSecurityConfig()
+                .jwtAuthenticationConverter()
+                .convert(jwt);
+
+        assertThat(authentication).isNotNull();
+        assertThat(authentication.getAuthorities())
+                .extracting("authority")
+                .contains("SCOPE_actuator.read")
+                .doesNotContain("ADMIN");
+    }
+
+    @Test
     void shouldConfigureDaoAuthenticationProvider() {
         // Verify that DaoAuthenticationProvider is configured
         assertThat(daoAuthenticationProvider).isNotNull();
