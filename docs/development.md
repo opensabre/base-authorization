@@ -2,9 +2,11 @@
 
 ## 启动前检查
 
-1. 按 `src/main/resources/db/` 中 DDL、DML 初始化授权服务数据库。
+1. 按 `base-k8s/docs/database-migrations.md` 创建数据库和迁移账号，运行授权服务的独立 Flyway 迁移；脚本位于 `src/main/resources/db/migration/mysql/`。
 2. 配置文件中的注册中心、数据库和缓存依赖应与当前环境一致。
 3. 使用 `mvn spring-boot:run` 启动；镜像构建以项目 Maven 配置为准。
+
+测试使用 `src/test/resources/db/authorization-service-fixture.sql` 中的 H2 夹具；它只服务于测试，生产表结构以 Flyway 迁移为准。
 
 ## 验证
 
