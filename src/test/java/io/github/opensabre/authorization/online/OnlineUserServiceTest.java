@@ -57,6 +57,21 @@ class OnlineUserServiceTest {
     }
 
     @Test
+    void shouldReturnRequestedPageAndTotal() {
+        redisOperations.setMembers("opensabre:gateway:session:online:sessions", Set.of("s1", "s2"));
+        redisOperations.setEntries("opensabre:gateway:session:online:session:s1", Map.of(
+                "username", "admin", "lastAccessTime", "2026-07-09T10:10:00"));
+        redisOperations.setEntries("opensabre:gateway:session:online:session:s2", Map.of(
+                "username", "guest", "lastAccessTime", "2026-07-09T10:09:00"));
+
+        var page = service.page(2, 1, null);
+
+        assertThat(page.getTotal()).isEqualTo(2);
+        assertThat(page.getCurrent()).isEqualTo(2);
+        assertThat(page.getRecords()).extracting(OnlineUser::getUsername).containsExactly("guest");
+    }
+
+    @Test
     void shouldDeleteOnlineIndexAndSpringSessionWhenKickout() {
         service.kickout("s1");
 

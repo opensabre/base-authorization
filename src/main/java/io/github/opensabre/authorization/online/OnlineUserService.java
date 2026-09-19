@@ -1,5 +1,7 @@
 package io.github.opensabre.authorization.online;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -34,6 +36,18 @@ public class OnlineUserService {
                 .filter(user -> !StringUtils.hasText(username) || contains(user.getUsername(), username))
                 .sorted(Comparator.comparing(OnlineUser::getLastAccessTime, Comparator.nullsLast(Comparator.reverseOrder())))
                 .toList();
+    }
+
+    public IPage<OnlineUser> page(long pageNum, long pageSize, String username) {
+        long current = Math.max(pageNum, 1);
+        long size = Math.min(Math.max(pageSize, 1), 100);
+        List<OnlineUser> users = list(username);
+        long total = users.size();
+        int from = (int) Math.min((current - 1) * size, total);
+        int to = (int) Math.min(from + size, total);
+        Page<OnlineUser> result = new Page<>(current, size, total);
+        result.setRecords(users.subList(from, to));
+        return result;
     }
 
     public Boolean kickout(String sessionId) {

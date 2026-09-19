@@ -1,5 +1,6 @@
 package io.github.opensabre.authorization.rest;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.github.opensabre.authorization.online.OnlineUser;
 import io.github.opensabre.authorization.online.OnlineUserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,8 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/online-users")
 @Tag(name = "在线用户")
@@ -27,9 +26,12 @@ public class OnlineUserController {
 
     @Operation(summary = "查询在线用户", description = "查询网关共享会话中的在线用户")
     @GetMapping
-    public List<OnlineUser> list(@Parameter(description = "用户名") @RequestParam(required = false) String username) {
-        log.info("list online users with username:{}", username);
-        return onlineUserService.list(username);
+    public IPage<OnlineUser> list(
+            @Parameter(description = "页码") @RequestParam(defaultValue = "1") long pageNum,
+            @Parameter(description = "每页条数") @RequestParam(defaultValue = "10") long pageSize,
+            @Parameter(description = "用户名") @RequestParam(required = false) String username) {
+        log.info("list online users with pageNum:{}, pageSize:{}, username:{}", pageNum, pageSize, username);
+        return onlineUserService.page(pageNum, pageSize, username);
     }
 
     @Operation(summary = "踢出在线用户", description = "删除在线索引与网关共享会话")
