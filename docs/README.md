@@ -14,7 +14,7 @@
 ## 维护约定
 
 - 接口以 `src/main/java/**/rest` 中的 Controller 为准。
-- 表结构与初始数据以 `src/main/resources/db/` 为准。
+- 表结构与受控初始数据以 `src/main/resources/db/migration/mysql/` 中的 Flyway 脚本为准。
 - 每次涉及授权流程、登录安全或令牌声明的改动，必须同步更新模块文档。
 
 - [授权服务错误码注册](modules/error-catalog.md)

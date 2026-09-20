@@ -15,7 +15,7 @@
 
 ### 启动命令
 
-部署脚本：启动数据库，部署`db`下的ddl和dml脚本
+部署脚本：由 `base-k8s` 创建数据库和迁移账号，先运行独立 Flyway 迁移（`src/main/resources/db/migration/mysql/`），再启动应用。
 
 启动应用：`mvn spring-boot:run`
 
